@@ -18,121 +18,102 @@
   --muted: #6a6860;
   --red: #e8341c;
   --red-dim: #2a100a;
-  --red-glow: rgba(232,52,28,0.15);
-  --amber: #f0a020;
-  --amber-dim: #2a1e08;
-  --green: #4ecb6e;
-  --green-dim: #0e2018;
-  --blue: #4a9eff;
-  --blue-dim: #0a1828;
-  --purple: #a070ff;
-  --purple-dim: #18102a;
   --radius: 14px;
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --c-people:  #4a9eff;
+  --c-money:   #4ecb6e;
+  --c-ops:     #f0a020;
+  --c-brand:   #e8341c;
+  --c-growth:  #a070ff;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 html, body { height: 100%; overflow: hidden; }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); }
 
-/* App shell */
 .app { display: flex; flex-direction: column; height: 100dvh; max-width: 480px; margin: 0 auto; }
 
 /* Header */
 .header {
   padding: calc(var(--safe-top) + 0.75rem) 1.25rem 0.75rem;
   display: flex; justify-content: space-between; align-items: center;
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
-.brand { display: flex; align-items: baseline; gap: 8px; }
-.brand-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 0.04em; color: var(--red); }
-.brand-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+.brand-name { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 0.04em; color: var(--red); line-height: 1; }
+.brand-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
 .view-toggle { display: flex; gap: 4px; }
 .toggle-btn {
   padding: 6px 12px; border-radius: 20px; font-family: 'DM Mono', monospace;
   font-size: 10px; letter-spacing: 0.06em; cursor: pointer; border: 1px solid var(--border);
-  background: transparent; color: var(--muted); transition: all 0.2s; text-transform: uppercase;
+  background: transparent; color: var(--muted); text-transform: uppercase;
 }
 .toggle-btn.active { background: var(--red); border-color: var(--red); color: white; }
 
-/* Scrollable content */
+/* Content */
 .content { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; }
 
 /* ── LIST VIEW ── */
 .list-view { padding: 1rem 1.25rem calc(var(--safe-bottom) + 5rem); }
-.focus-card {
-  background: var(--red-dim); border: 1px solid #3a1810;
-  border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; cursor: pointer;
-  position: relative; overflow: hidden;
-}
-.focus-card::before {
-  content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-  width: 3px; background: var(--red);
-}
-.section-tag {
-  font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em;
-  text-transform: uppercase; margin-bottom: 5px;
-}
-.focus-text { font-size: 15px; color: #f0a090; line-height: 1.4; }
-.section {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem;
-}
-.section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.add-btn {
-  width: 26px; height: 26px; border-radius: 7px; background: var(--surface2);
-  border: 1px solid var(--border); color: var(--muted); font-size: 18px;
-  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
-}
-.add-btn:active { background: var(--border); color: var(--text); }
-.task-item {
-  display: flex; align-items: flex-start; gap: 10px; padding: 8px 0;
-  border-bottom: 1px solid var(--border); cursor: pointer;
-}
-.task-item:last-of-type { border-bottom: none; }
-.check {
-  width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border);
-  flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center;
-}
-.check.done { background: var(--green); border-color: var(--green); }
-.check.done::after {
-  content: ''; width: 9px; height: 5px;
-  border-left: 2px solid #0a0a08; border-bottom: 2px solid #0a0a08;
-  transform: rotate(-45deg) translateY(-1px); display: block;
-}
-.task-text { font-size: 14px; line-height: 1.4; color: var(--text); flex: 1; }
-.task-text.done { color: var(--muted); text-decoration: line-through; }
-.idea-item { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); }
-.idea-item:last-of-type { border-bottom: none; }
-.idea-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
-.idea-text { font-size: 14px; color: var(--muted); line-height: 1.4; flex: 1; }
-.schedule-item { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-.schedule-item:last-of-type { border-bottom: none; }
-.schedule-time { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--blue); min-width: 44px; flex-shrink: 0; margin-top: 2px; }
-.schedule-text { font-size: 14px; color: var(--text); flex: 1; line-height: 1.4; }
-.delete-btn { color: var(--muted); cursor: pointer; font-size: 16px; padding: 0 2px; }
-.delete-btn:active { color: var(--red); }
-.now-marker { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
-.now-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
-.now-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--red); letter-spacing: 0.1em; text-transform: uppercase; }
-.ask-btn {
-  width: 100%; padding: 14px; background: var(--red); border: none;
-  border-radius: var(--radius); color: white; font-family: 'Bebas Neue', sans-serif;
-  font-size: 18px; letter-spacing: 0.08em; cursor: pointer; margin-bottom: 1rem;
-  transition: opacity 0.2s;
-}
-.ask-btn:active { opacity: 0.8; }
-.empty { font-size: 13px; color: var(--muted); font-style: italic; padding: 4px 0; }
-.stat-row { display: flex; gap: 8px; margin-bottom: 1rem; }
-.stat-card { flex: 1; background: var(--surface2); border-radius: 10px; padding: 10px 12px; }
-.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 24px; color: var(--text); line-height: 1; }
+
+/* Stats row */
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+.stat-card { background: var(--surface2); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 22px; line-height: 1; }
 .stat-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
 
+/* Focus */
+.focus-card {
+  border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1rem; cursor: pointer;
+  background: var(--red-dim); border-left: 3px solid var(--red); border-top: 1px solid #3a1810;
+  border-right: 1px solid #3a1810; border-bottom: 1px solid #3a1810;
+}
+.section-tag { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 5px; }
+.focus-text { font-size: 15px; color: #f0a090; line-height: 1.4; }
+
+/* Branch sections */
+.branch-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 0.75rem; overflow: hidden; }
+.branch-header { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 1.25rem; cursor: pointer; }
+.branch-title { display: flex; align-items: center; gap: 8px; }
+.branch-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.branch-name { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; }
+.branch-count { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); }
+.branch-actions { display: flex; align-items: center; gap: 8px; }
+.add-btn {
+  width: 24px; height: 24px; border-radius: 6px; background: var(--surface2);
+  border: 1px solid var(--border); color: var(--muted); font-size: 16px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+}
+.chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+.branch-body { display: none; padding: 0 1.25rem 1rem; border-top: 1px solid var(--border); }
+.branch-body.open { display: block; }
+
+/* Items */
+.item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.item:last-of-type { border-bottom: none; }
+.check { width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.check.done { border-color: #4ecb6e; background: #4ecb6e; }
+.check.done::after { content: ''; width: 8px; height: 5px; border-left: 2px solid #0a0a08; border-bottom: 2px solid #0a0a08; transform: rotate(-45deg) translateY(-1px); display: block; }
+.item-text { font-size: 13px; line-height: 1.4; color: var(--text); flex: 1; cursor: pointer; }
+.item-text.done { color: var(--muted); text-decoration: line-through; }
+.item-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
+.del { color: var(--muted); font-size: 15px; cursor: pointer; padding: 0 2px; flex-shrink: 0; }
+.del:active { color: var(--red); }
+.empty { font-size: 12px; color: var(--muted); font-style: italic; padding: 8px 0; }
+
+/* Ask button */
+.ask-btn {
+  width: 100%; padding: 15px; background: var(--red); border: none;
+  border-radius: var(--radius); color: white; font-family: 'Bebas Neue', sans-serif;
+  font-size: 20px; letter-spacing: 0.08em; cursor: pointer; margin-top: 0.5rem;
+}
+.ask-btn:active { opacity: 0.85; }
+
 /* ── MAP VIEW ── */
-.map-view { height: 100%; position: relative; overflow: hidden; }
-#map-canvas { width: 100%; height: 100%; display: block; }
-.map-ui { position: absolute; bottom: calc(var(--safe-bottom) + 1rem); left: 1.25rem; right: 1.25rem; }
+.map-view { height: 100%; position: relative; display: flex; flex-direction: column; }
+#map-canvas { flex: 1; width: 100%; display: block; }
+.map-bottom { padding: 0.75rem 1.25rem calc(var(--safe-bottom) + 0.75rem); flex-shrink: 0; }
 .map-ask-btn {
   width: 100%; padding: 14px; background: var(--red); border: none;
   border-radius: var(--radius); color: white; font-family: 'Bebas Neue', sans-serif;
@@ -140,10 +121,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 }
 
 /* Modal */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-  z-index: 200; align-items: flex-end; justify-content: center;
-}
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 200; align-items: flex-end; justify-content: center; }
 .modal-overlay.open { display: flex; }
 .modal {
   background: var(--surface); border: 1px solid var(--border);
@@ -153,40 +131,33 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 0.04em; color: var(--red); margin-bottom: 1rem; }
-.modal input, .modal textarea {
+.modal input, .modal textarea, .modal select {
   width: 100%; background: var(--surface2); border: 1px solid var(--border);
   border-radius: 8px; padding: 12px; color: var(--text); font-family: 'DM Sans', sans-serif;
   font-size: 15px; outline: none; margin-bottom: 10px; -webkit-appearance: none;
 }
 .modal input:focus, .modal textarea:focus { border-color: var(--red); }
-.modal textarea { resize: none; height: 80px; }
-.modal-row { display: flex; gap: 8px; margin-bottom: 10px; }
-.modal-row input { flex: 1; margin-bottom: 0; }
+.modal textarea { resize: none; height: 70px; }
 .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
-.btn-primary {
-  flex: 1; padding: 13px; background: var(--red); border: none; border-radius: 8px;
-  color: white; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.06em; cursor: pointer;
+.btn-save { flex: 1; padding: 13px; background: var(--red); border: none; border-radius: 8px; color: white; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 0.06em; cursor: pointer; }
+.btn-cancel { padding: 13px 20px; background: transparent; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; }
+.picker-label { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.picker-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.picker-chip {
+  padding: 5px 12px; border-radius: 20px; font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+  border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer;
 }
-.btn-cancel {
-  padding: 13px 20px; background: transparent; border: 1px solid var(--border);
-  border-radius: 8px; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer;
-}
-.branch-modal-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.branch-chip {
-  padding: 6px 14px; border-radius: 20px; font-size: 13px; cursor: pointer;
-  border: 1px solid var(--border); background: var(--surface2); color: var(--muted);
-  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
-}
-.branch-chip.selected { border-color: var(--red); color: var(--red); background: var(--red-dim); }
+.picker-chip.sel { color: white; border-color: transparent; }
 </style>
 </head>
 <body>
 <div class="app">
 
   <div class="header">
-    <div class="brand">
+    <div>
       <div class="brand-name">Slizzistant</div>
-      <div class="brand-sub">Thin Slizzy</div>
+      <div class="brand-sub">Thin Slizzy · Collingwood</div>
     </div>
     <div class="view-toggle">
       <button class="toggle-btn active" id="btn-list" onclick="switchView('list')">List</button>
@@ -199,61 +170,37 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     <!-- LIST VIEW -->
     <div class="list-view" id="list-view">
 
-      <div style="margin-bottom:1rem">
-        <div class="stat-row">
-          <div class="stat-card">
-            <div class="stat-val" id="stat-done">0/0</div>
-            <div class="stat-lbl">tasks today</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-val" id="stat-ideas">0</div>
-            <div class="stat-lbl">ideas parked</div>
-          </div>
-          <div class="stat-card" onclick="openModal('revenue')" style="cursor:pointer">
-            <div class="stat-val" id="stat-revenue">$—</div>
-            <div class="stat-lbl">today's sales</div>
-          </div>
+      <div class="stat-row">
+        <div class="stat-card" onclick="openModal('revenue')">
+          <div class="stat-val" id="s-revenue" style="color:var(--c-money)">$—</div>
+          <div class="stat-lbl">today's $</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="s-tasks" style="color:var(--red)">0/0</div>
+          <div class="stat-lbl">tasks done</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="s-staff" style="color:var(--c-people)">—</div>
+          <div class="stat-lbl">staff tonight</div>
         </div>
       </div>
 
       <div class="focus-card" onclick="openModal('focus')">
-        <div class="section-tag" style="color:var(--red)">today's focus</div>
-        <div class="focus-text" id="focus-display">Tap to set your one thing for today</div>
+        <div class="section-tag" style="color:var(--red)">tonight's focus</div>
+        <div class="focus-text" id="focus-display">Tap to set your one thing for tonight</div>
       </div>
 
-      <div class="section">
-        <div class="section-header">
-          <div class="section-tag" style="color:var(--blue);margin:0">schedule</div>
-          <div class="add-btn" onclick="openModal('schedule')" style="color:var(--blue)">+</div>
-        </div>
-        <div id="schedule-list"><div class="empty">no time blocks — tap + to add</div></div>
-      </div>
+      <div id="branch-list"></div>
 
-      <div class="section">
-        <div class="section-header">
-          <div class="section-tag" style="margin:0">tasks</div>
-          <div class="add-btn" onclick="openModal('task')">+</div>
-        </div>
-        <div id="task-list"><div class="empty">no tasks — tap + to add one</div></div>
-      </div>
-
-      <div class="section">
-        <div class="section-header">
-          <div class="section-tag" style="color:var(--purple);margin:0">ideas</div>
-          <div class="add-btn" onclick="openModal('idea')" style="color:var(--purple)">+</div>
-        </div>
-        <div id="idea-list"><div class="empty">no ideas — tap + to capture one</div></div>
-      </div>
-
-      <button class="ask-btn" onclick="askClaude()">Ask Slizzistant</button>
+      <button class="ask-btn" onclick="askClaude()">Ask Slizzistant ↗</button>
 
     </div>
 
     <!-- MAP VIEW -->
     <div class="map-view" id="map-view" style="display:none">
       <canvas id="map-canvas"></canvas>
-      <div class="map-ui">
-        <button class="map-ask-btn" onclick="askClaude()">Ask Slizzistant</button>
+      <div class="map-bottom">
+        <button class="map-ask-btn" onclick="askClaude()">Ask Slizzistant ↗</button>
       </div>
     </div>
 
@@ -261,310 +208,317 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </div>
 
 <!-- Modal -->
-<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+<div class="modal-overlay" id="modal" onclick="closeModalBg(event)">
   <div class="modal">
     <div class="modal-title" id="modal-title">Add</div>
-    <input type="text" id="modal-input" style="display:none" />
-    <textarea id="modal-textarea" style="display:none"></textarea>
-    <div class="modal-row" id="modal-schedule-row" style="display:none">
-      <input type="time" id="modal-time" style="flex:0 0 110px" />
-      <input type="text" id="modal-schedule-text" placeholder="What's happening?" />
-    </div>
-    <input type="number" id="modal-revenue" placeholder="Today's sales ($)" style="display:none" />
-    <div id="modal-branch-picker" style="display:none">
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">File under</div>
-      <div class="branch-modal-list" id="branch-chips"></div>
-    </div>
+    <div id="modal-body"></div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModalDirect()">Cancel</button>
-      <button class="btn-primary" onclick="saveModal()">Save</button>
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveModal()">Save</button>
     </div>
   </div>
 </div>
 
 <script>
-const SK = 'slizzistant_v1'
-let modalMode = '', selectedBranch = 'today', currentView = 'list'
+const SK = 'slizzistant_v2'
+let modalMode = '', modalBranch = 'people', currentView = 'list'
 
 const BRANCHES = [
-  { id: 'today',      label: 'Today',      color: '#e8341c' },
-  { id: 'ideas',      label: 'Ideas',      color: '#a070ff' },
-  { id: 'operations', label: 'Operations', color: '#f0a020' },
-  { id: 'growth',     label: 'Growth',     color: '#4ecb6e' },
-  { id: 'money',      label: 'Money',      color: '#4a9eff' },
+  { id:'people',     label:'People',     color:'var(--c-people)',  hex:'#4a9eff', desc:'Staff, roster, bench' },
+  { id:'money',      label:'Money',      color:'var(--c-money)',   hex:'#4ecb6e', desc:'Sales, costs, targets' },
+  { id:'operations', label:'Operations', color:'var(--c-ops)',     hex:'#f0a020', desc:'Systems, standards, prep' },
+  { id:'brand',      label:'Brand',      color:'var(--c-brand)',   hex:'#e8341c', desc:'Marketing, socials, events' },
+  { id:'growth',     label:'Growth',     color:'var(--c-growth)',  hex:'#a070ff', desc:'Next moves, big ideas' },
 ]
 
-function loadData() {
-  try { const r = localStorage.getItem(SK); if(r) return JSON.parse(r) } catch(e) {}
-  return { focus:'', tasks:[], ideas:[], schedule:[], revenue:'', lastUpdated:'' }
+function def() {
+  return { focus:'', revenue:'', staffCount:'', items:[], openBranches:['people'] }
 }
-function saveData(d) { localStorage.setItem(SK, JSON.stringify(d)) }
-
-function formatTime(t) {
-  if(!t) return ''
-  const [h,m] = t.split(':'), hr = parseInt(h)
-  return (hr%12||12)+':'+m+(hr>=12?'pm':'am')
+function load() {
+  try { const r=localStorage.getItem(SK); if(r) { const d=JSON.parse(r); if(!d.openBranches) d.openBranches=['people']; return d } } catch(e) {}
+  return def()
 }
-function nowTime() {
-  const n = new Date()
-  return n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0')
-}
+function save(d) { localStorage.setItem(SK,JSON.stringify(d)) }
 
 function switchView(v) {
-  currentView = v
-  document.getElementById('list-view').style.display = v==='list' ? 'block' : 'none'
-  document.getElementById('map-view').style.display = v==='map' ? 'block' : 'none'
-  document.getElementById('btn-list').classList.toggle('active', v==='list')
-  document.getElementById('btn-map').classList.toggle('active', v==='map')
-  document.getElementById('content').style.overflow = v==='map' ? 'hidden' : 'auto'
-  if(v==='map') drawMap()
+  currentView=v
+  document.getElementById('list-view').style.display=v==='list'?'block':'none'
+  document.getElementById('map-view').style.display=v==='map'?'flex':'none'
+  document.getElementById('btn-list').classList.toggle('active',v==='list')
+  document.getElementById('btn-map').classList.toggle('active',v==='map')
+  document.getElementById('content').style.overflow=v==='map'?'hidden':'auto'
+  if(v==='map') setTimeout(drawMap,50)
 }
 
 function render() {
-  const d = loadData()
-  const done = d.tasks.filter(t=>t.done).length
-  document.getElementById('stat-done').textContent = done+'/'+d.tasks.length
-  document.getElementById('stat-ideas').textContent = d.ideas.length
-  document.getElementById('stat-revenue').textContent = d.revenue ? '$'+d.revenue : '$—'
-  document.getElementById('focus-display').textContent = d.focus || 'Tap to set your one thing for today'
+  const d=load()
+  const items=d.items||[]
+  const tasks=items.filter(i=>i.type==='task')
+  const done=tasks.filter(t=>t.done).length
 
-  // Schedule
-  const sl = document.getElementById('schedule-list')
-  const sched = (d.schedule||[]).slice().sort((a,b)=>a.time.localeCompare(b.time))
-  const cur = nowTime()
-  if(!sched.length) { sl.innerHTML='<div class="empty">no time blocks — tap + to add</div>' }
-  else {
-    let html='', nowDone=false
-    sched.forEach((s,i)=>{
-      if(!nowDone && s.time>cur) { html+=`<div class="now-marker"><div class="now-dot"></div><span class="now-label">now</span></div>`; nowDone=true }
-      html+=`<div class="schedule-item"><span class="schedule-time">${formatTime(s.time)}</span><span class="schedule-text">${s.text}</span><span class="delete-btn" onclick="deleteItem('schedule',${i})">×</span></div>`
-    })
-    sl.innerHTML=html
-  }
+  document.getElementById('s-revenue').textContent=d.revenue?'$'+Number(d.revenue).toLocaleString():'$—'
+  document.getElementById('s-tasks').textContent=done+'/'+tasks.length
+  document.getElementById('s-staff').textContent=d.staffCount||'—'
+  document.getElementById('focus-display').textContent=d.focus||'Tap to set your one thing for tonight'
 
-  // Tasks
-  const tl = document.getElementById('task-list')
-  tl.innerHTML = d.tasks.length ? d.tasks.map((t,i)=>`<div class="task-item" onclick="toggleTask(${i})"><div class="check ${t.done?'done':''}"></div><span class="task-text ${t.done?'done':''}">${t.text}</span><span class="delete-btn" onclick="event.stopPropagation();deleteItem('task',${i})">×</span></div>`).join('') : '<div class="empty">no tasks — tap + to add one</div>'
+  // Branches
+  const bl=document.getElementById('branch-list')
+  bl.innerHTML=BRANCHES.map(b=>{
+    const bItems=items.filter(i=>i.branch===b.id)
+    const bTasks=bItems.filter(i=>i.type==='task')
+    const bDone=bTasks.filter(i=>i.done).length
+    const isOpen=(d.openBranches||[]).includes(b.id)
+    const countText=bTasks.length?`${bDone}/${bTasks.length}`:(bItems.length?bItems.length:'0')
 
-  // Ideas
-  const il = document.getElementById('idea-list')
-  il.innerHTML = d.ideas.length ? d.ideas.map((id,i)=>`<div class="idea-item"><div class="idea-dot" style="background:${BRANCHES.find(b=>b.id===(id.branch||'ideas'))?.color||'#a070ff'}"></div><span class="idea-text">${id.text||id}</span><span class="delete-btn" onclick="deleteItem('idea',${i})">×</span></div>`).join('') : '<div class="empty">no ideas — tap + to capture one</div>'
+    const itemsHtml=bItems.length ? bItems.map((item,idx)=>{
+      const globalIdx=items.indexOf(item)
+      if(item.type==='task') {
+        return `<div class="item">
+          <div class="check ${item.done?'done':''}" onclick="toggleTask(${globalIdx})"></div>
+          <div style="flex:1;cursor:pointer" onclick="toggleTask(${globalIdx})">
+            <div class="item-text ${item.done?'done':''}">${item.text}</div>
+          </div>
+          <span class="del" onclick="delItem(${globalIdx})">×</span>
+        </div>`
+      } else {
+        return `<div class="item">
+          <div style="width:7px;height:7px;border-radius:50%;background:${b.hex};flex-shrink:0;margin-top:5px"></div>
+          <div style="flex:1">
+            <div class="item-text">${item.text}</div>
+            ${item.note?`<div class="item-meta">${item.note}</div>`:''}
+          </div>
+          <span class="del" onclick="delItem(${globalIdx})">×</span>
+        </div>`
+      }
+    }).join('') : '<div class="empty">nothing here yet</div>'
+
+    return `<div class="branch-section">
+      <div class="branch-header" onclick="toggleBranch('${b.id}')">
+        <div class="branch-title">
+          <div class="branch-dot" style="background:${b.hex}"></div>
+          <span class="branch-name" style="color:${b.hex}">${b.label}</span>
+          <span class="branch-count">${countText}</span>
+        </div>
+        <div class="branch-actions">
+          <div class="add-btn" onclick="event.stopPropagation();openItemModal('${b.id}')" style="color:${b.hex}">+</div>
+          <span class="chevron ${isOpen?'open':''}">▾</span>
+        </div>
+      </div>
+      <div class="branch-body ${isOpen?'open':''}">${itemsHtml}</div>
+    </div>`
+  }).join('')
 
   if(currentView==='map') drawMap()
 }
 
-function toggleTask(i) { const d=loadData(); d.tasks[i].done=!d.tasks[i].done; saveData(d); render() }
-function deleteItem(type, i) {
-  const d=loadData()
-  if(type==='task') d.tasks.splice(i,1)
-  else if(type==='idea') d.ideas.splice(i,1)
-  else if(type==='schedule') d.schedule.splice(i,1)
-  saveData(d); render()
+function toggleBranch(id) {
+  const d=load()
+  if(!d.openBranches) d.openBranches=[]
+  const idx=d.openBranches.indexOf(id)
+  if(idx>=0) d.openBranches.splice(idx,1)
+  else d.openBranches.push(id)
+  save(d); render()
 }
 
+function toggleTask(idx) {
+  const d=load()
+  d.items[idx].done=!d.items[idx].done
+  save(d); render()
+}
+
+function delItem(idx) {
+  const d=load()
+  d.items.splice(idx,1)
+  save(d); render()
+}
+
+// Modal system
+let modalData={}
 function openModal(mode) {
-  modalMode = mode
+  modalMode=mode; modalData={}
+  const d=load()
   document.getElementById('modal').classList.add('open')
-  document.getElementById('modal-input').style.display='none'
-  document.getElementById('modal-textarea').style.display='none'
-  document.getElementById('modal-schedule-row').style.display='none'
-  document.getElementById('modal-revenue').style.display='none'
-  document.getElementById('modal-branch-picker').style.display='none'
-  const d = loadData()
 
   if(mode==='focus') {
-    document.getElementById('modal-title').textContent='Today\'s Focus'
-    const ta=document.getElementById('modal-textarea'); ta.style.display='block'
-    ta.value=d.focus||''; ta.placeholder="The one thing you're protecting time for..."
-    setTimeout(()=>ta.focus(),100)
-  } else if(mode==='task') {
-    document.getElementById('modal-title').textContent='New Task'
-    const inp=document.getElementById('modal-input'); inp.style.display='block'
-    inp.value=''; inp.placeholder='What needs doing today?'
-    setTimeout(()=>inp.focus(),100)
-  } else if(mode==='idea') {
-    document.getElementById('modal-title').textContent='Capture Idea'
-    const inp=document.getElementById('modal-input'); inp.style.display='block'
-    inp.value=''; inp.placeholder="What's the idea?"
-    document.getElementById('modal-branch-picker').style.display='block'
-    selectedBranch='ideas'
-    renderBranchChips()
-    setTimeout(()=>inp.focus(),100)
-  } else if(mode==='schedule') {
-    document.getElementById('modal-title').textContent='Time Block'
-    document.getElementById('modal-schedule-row').style.display='flex'
-    document.getElementById('modal-time').value=nowTime()
-    document.getElementById('modal-schedule-text').value=''
-    setTimeout(()=>document.getElementById('modal-schedule-text').focus(),100)
+    document.getElementById('modal-title').textContent="Tonight's Focus"
+    document.getElementById('modal-body').innerHTML=`<textarea id="m-focus" placeholder="The one thing you're protecting tonight...">${d.focus||''}</textarea>`
+    setTimeout(()=>document.getElementById('m-focus').focus(),100)
   } else if(mode==='revenue') {
-    document.getElementById('modal-title').textContent='Today\'s Sales'
-    const inp=document.getElementById('modal-revenue'); inp.style.display='block'
-    inp.value=d.revenue||''; setTimeout(()=>inp.focus(),100)
+    document.getElementById('modal-title').textContent="Today's Sales"
+    document.getElementById('modal-body').innerHTML=`<input type="number" id="m-revenue" placeholder="Enter amount e.g. 2400" value="${d.revenue||''}">`
+    setTimeout(()=>document.getElementById('m-revenue').focus(),100)
+  } else if(mode==='staff') {
+    document.getElementById('modal-title').textContent="Staff Tonight"
+    document.getElementById('modal-body').innerHTML=`<input type="number" id="m-staff" placeholder="Number of staff on tonight" value="${d.staffCount||''}">`
+    setTimeout(()=>document.getElementById('m-staff').focus(),100)
   }
 }
 
-function renderBranchChips() {
-  document.getElementById('branch-chips').innerHTML = BRANCHES.map(b=>
-    `<div class="branch-chip ${selectedBranch===b.id?'selected':''}" onclick="selectBranch('${b.id}')">${b.label}</div>`
-  ).join('')
+function openItemModal(branchId) {
+  modalMode='item'; modalBranch=branchId
+  const b=BRANCHES.find(x=>x.id===branchId)
+  document.getElementById('modal-title').textContent='Add to '+b.label
+  document.getElementById('modal-body').innerHTML=`
+    <div class="picker-label">Type</div>
+    <div class="picker-row">
+      <div class="picker-chip sel" id="chip-task" style="background:${b.hex}" onclick="selectType('task','${b.hex}')">Task</div>
+      <div class="picker-chip" id="chip-note" onclick="selectType('note','${b.hex}')">Note / Idea</div>
+    </div>
+    <input type="text" id="m-item-text" placeholder="What is it?" />
+    <input type="text" id="m-item-note" placeholder="Extra detail (optional)" />
+  `
+  modalData={itemType:'task'}
+  document.getElementById('modal').classList.add('open')
+  setTimeout(()=>document.getElementById('m-item-text').focus(),100)
 }
-function selectBranch(id) { selectedBranch=id; renderBranchChips() }
 
-function closeModal(e) { if(e.target===document.getElementById('modal')) closeModalDirect() }
-function closeModalDirect() { document.getElementById('modal').classList.remove('open') }
+function selectType(type, hex) {
+  modalData.itemType=type
+  document.getElementById('chip-task').className='picker-chip'+(type==='task'?' sel':'')
+  document.getElementById('chip-note').className='picker-chip'+(type==='note'?' sel':'')
+  if(type==='task') document.getElementById('chip-task').style.background=hex
+  else { document.getElementById('chip-task').style.background=''; document.getElementById('chip-note').style.background=hex }
+}
+
+function closeModal() { document.getElementById('modal').classList.remove('open') }
+function closeModalBg(e) { if(e.target===document.getElementById('modal')) closeModal() }
 
 function saveModal() {
-  const d=loadData()
-  if(!d.schedule) d.schedule=[]
-  if(modalMode==='focus') { const v=document.getElementById('modal-textarea').value.trim(); if(v) d.focus=v }
-  else if(modalMode==='task') { const v=document.getElementById('modal-input').value.trim(); if(v) d.tasks.push({text:v,done:false}) }
-  else if(modalMode==='idea') { const v=document.getElementById('modal-input').value.trim(); if(v) d.ideas.push({text:v,branch:selectedBranch}) }
-  else if(modalMode==='schedule') {
-    const t=document.getElementById('modal-time').value, tx=document.getElementById('modal-schedule-text').value.trim()
-    if(t&&tx) d.schedule.push({time:t,text:tx})
+  const d=load()
+  if(modalMode==='focus') {
+    const v=document.getElementById('m-focus')?.value.trim(); if(v) d.focus=v
+  } else if(modalMode==='revenue') {
+    const v=document.getElementById('m-revenue')?.value; d.revenue=v
+  } else if(modalMode==='staff') {
+    const v=document.getElementById('m-staff')?.value; d.staffCount=v
+  } else if(modalMode==='item') {
+    const text=document.getElementById('m-item-text')?.value.trim()
+    const note=document.getElementById('m-item-note')?.value.trim()
+    if(text) {
+      if(!d.items) d.items=[]
+      d.items.push({type:modalData.itemType||'task', branch:modalBranch, text, note, done:false})
+    }
   }
-  else if(modalMode==='revenue') { const v=document.getElementById('modal-revenue').value; d.revenue=v }
-  saveData(d); closeModalDirect(); render()
+  save(d); closeModal(); render()
 }
 
+// Stat card taps
+document.getElementById('s-staff').parentElement.onclick=()=>openModal('staff')
+
+// Enter key
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('modal').classList.contains('open')) saveModal()
+})
+
+// Ask Claude
 function askClaude() {
-  const d = loadData()
-  const done = d.tasks.filter(t=>t.done).length
-  const sched = (d.schedule||[]).slice().sort((a,b)=>a.time.localeCompare(b.time)).map(s=>formatTime(s.time)+' '+s.text).join(', ')
-  const ideas = d.ideas.map(i=>i.text||i).join(', ')
-  const msg = `I run Thin Slizzy pizza shop. Here's where I'm at:
+  const d=load()
+  const items=d.items||[]
+  const tasks=items.filter(i=>i.type==='task')
+  const done=tasks.filter(t=>t.done).length
 
-Focus: ${d.focus||'not set'}
-Schedule: ${sched||'nothing scheduled'}
-Tasks: ${d.tasks.length ? d.tasks.map(t=>(t.done?'✓ ':'○ ')+t.text).join(', ') : 'none'} (${done}/${d.tasks.length} done)
-Ideas parked: ${ideas||'none'}
+  const byBranch=BRANCHES.map(b=>{
+    const bi=items.filter(i=>i.branch===b.id)
+    if(!bi.length) return null
+    return b.label+':\n'+bi.map(i=>(i.type==='task'?(i.done?'✓ ':'○ ')+i.text:' · '+i.text+(i.note?' ('+i.note+')':''))).join('\n')
+  }).filter(Boolean).join('\n\n')
+
+  const msg=`I'm Scott, owner of Thin Slizzy — rock n roll pizzeria at 115 Johnston St Collingwood, next to The Tote. I run it solo with casual staff.
+
+Tonight's focus: ${d.focus||'not set'}
+Staff on tonight: ${d.staffCount||'not set'}
 Today's sales: ${d.revenue?'$'+d.revenue:'not entered'}
+Tasks: ${done}/${tasks.length} done
 
-What should I focus on right now, and is there anything I'm missing or should be thinking about?`
+${byBranch||'No items added yet.'}
 
-  const url = 'https://claude.ai/new?q=' + encodeURIComponent(msg)
-  window.open(url, '_blank')
+Based on all this — what should I be focusing on right now? What am I missing? What's the most important thing to move forward?`
+
+  window.open('https://claude.ai/new?q='+encodeURIComponent(msg),'_blank')
 }
 
 // ── MIND MAP ────────────────────────────────
 function drawMap() {
-  const canvas = document.getElementById('map-canvas')
-  const container = document.getElementById('map-view')
-  canvas.width = container.offsetWidth
-  canvas.height = container.offsetHeight - 80
-  const ctx = canvas.getContext('2d')
-  const d = loadData()
-  const cx = canvas.width/2, cy = canvas.height/2 - 20
-  ctx.clearRect(0,0,canvas.width,canvas.height)
+  const canvas=document.getElementById('map-canvas')
+  const container=document.getElementById('map-view')
+  canvas.width=container.offsetWidth
+  canvas.height=container.offsetHeight-70
+  const ctx=canvas.getContext('2d')
+  const d=load(), items=d.items||[]
+  const W=canvas.width, H=canvas.height
+  const cx=W/2, cy=H/2
 
-  // Background
-  ctx.fillStyle = '#0a0a08'
-  ctx.fillRect(0,0,canvas.width,canvas.height)
+  ctx.fillStyle='#0a0a08'
+  ctx.fillRect(0,0,W,H)
 
-  // Subtle grid
-  ctx.strokeStyle = 'rgba(255,255,255,0.03)'
-  ctx.lineWidth = 1
-  for(let x=0; x<canvas.width; x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,canvas.height); ctx.stroke() }
-  for(let y=0; y<canvas.height; y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(canvas.width,y); ctx.stroke() }
+  // Subtle dots
+  ctx.fillStyle='rgba(255,255,255,0.04)'
+  for(let x=0;x<W;x+=32) for(let y=0;y<H;y+=32) { ctx.beginPath(); ctx.arc(x,y,1,0,Math.PI*2); ctx.fill() }
 
-  // Branch positions — arranged around centre
-  const angles = [-90, -18, 54, 126, 198]
-  const radius = Math.min(canvas.width, canvas.height) * 0.32
+  const r=Math.min(W,H)*0.30
+  const angles=[-90,-18,54,126,198]
 
-  const branchData = {
-    today: { count: d.tasks.length, sub: d.tasks.length ? d.tasks[0].text : 'no tasks' },
-    ideas: { count: d.ideas.length, sub: d.ideas.length ? (d.ideas[0].text||d.ideas[0]) : 'no ideas' },
-    operations: { count: (d.schedule||[]).length, sub: (d.schedule||[]).length ? formatTime((d.schedule||[])[0]?.time)+' '+((d.schedule||[])[0]?.text||'') : 'no schedule' },
-    growth: { count: d.ideas.filter(i=>i.branch==='growth').length, sub: 'tap to expand' },
-    money: { count: d.revenue ? 1 : 0, sub: d.revenue ? '$'+d.revenue+' today' : 'no sales entered' },
-  }
+  BRANCHES.forEach((b,i)=>{
+    const angle=angles[i]*Math.PI/180
+    const bx=cx+Math.cos(angle)*r, by=cy+Math.sin(angle)*r
+    const bItems=items.filter(x=>x.branch===b.id)
+    const bTasks=bItems.filter(x=>x.type==='task')
+    const bDone=bTasks.filter(x=>x.done).length
 
-  BRANCHES.forEach((branch, idx) => {
-    const angle = (angles[idx] * Math.PI) / 180
-    const bx = cx + Math.cos(angle) * radius
-    const by = cy + Math.sin(angle) * radius
-    const bd = branchData[branch.id]
+    // Line
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(bx,by)
+    ctx.strokeStyle=b.hex+'50'; ctx.lineWidth=1.5; ctx.setLineDash([3,5]); ctx.stroke(); ctx.setLineDash([])
 
-    // Connection line
-    ctx.beginPath()
-    ctx.moveTo(cx, cy)
-    ctx.lineTo(bx, by)
-    ctx.strokeStyle = branch.color + '40'
-    ctx.lineWidth = 1.5
-    ctx.setLineDash([4, 6])
-    ctx.stroke()
-    ctx.setLineDash([])
+    // Node
+    const nr=40
+    ctx.beginPath(); ctx.arc(bx,by,nr,0,Math.PI*2)
+    ctx.fillStyle=b.hex+'15'; ctx.fill()
+    ctx.strokeStyle=b.hex+'70'; ctx.lineWidth=1.5; ctx.stroke()
 
-    // Branch node
-    const nodeR = 44
-    ctx.beginPath()
-    ctx.arc(bx, by, nodeR, 0, Math.PI*2)
-    ctx.fillStyle = branch.color + '18'
-    ctx.fill()
-    ctx.strokeStyle = branch.color + '60'
-    ctx.lineWidth = 1.5
-    ctx.stroke()
-
-    // Count badge
-    if(bd.count > 0) {
-      ctx.beginPath()
-      ctx.arc(bx + nodeR - 8, by - nodeR + 8, 10, 0, Math.PI*2)
-      ctx.fillStyle = branch.color
-      ctx.fill()
-      ctx.fillStyle = '#0a0a08'
-      ctx.font = 'bold 10px DM Sans'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      ctx.fillText(bd.count, bx + nodeR - 8, by - nodeR + 8)
+    // Count
+    if(bItems.length>0) {
+      ctx.beginPath(); ctx.arc(bx+nr-6,by-nr+6,11,0,Math.PI*2)
+      ctx.fillStyle=b.hex; ctx.fill()
+      ctx.fillStyle='#0a0a08'; ctx.font='bold 10px DM Sans,sans-serif'
+      ctx.textAlign='center'; ctx.textBaseline='middle'
+      ctx.fillText(bItems.length,bx+nr-6,by-nr+6)
     }
 
     // Label
-    ctx.fillStyle = branch.color
-    ctx.font = '500 13px DM Sans'
-    ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    ctx.fillText(branch.label, bx, by - 8)
+    ctx.fillStyle=b.hex; ctx.font='500 13px DM Sans,sans-serif'
+    ctx.textAlign='center'; ctx.textBaseline='middle'
+    ctx.fillText(b.label,bx,by-7)
 
-    // Sub label
-    const subText = bd.sub.length > 16 ? bd.sub.slice(0,16)+'…' : bd.sub
-    ctx.fillStyle = 'rgba(255,255,255,0.35)'
-    ctx.font = '11px DM Sans'
-    ctx.fillText(subText, bx, by + 8)
+    // Sub items preview
+    const preview=bItems.slice(0,2).map(x=>x.text.slice(0,14)+(x.text.length>14?'…':'')).join(', ')
+    ctx.fillStyle='rgba(242,240,232,0.3)'; ctx.font='11px DM Sans,sans-serif'
+    ctx.fillText(preview||b.desc,bx,by+8)
+
+    // Done bar for tasks
+    if(bTasks.length>0) {
+      const bw=60, bh=3, bLeft=bx-bw/2, bTop=by+20
+      ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.beginPath(); ctx.roundRect(bLeft,bTop,bw,bh,2); ctx.fill()
+      ctx.fillStyle=b.hex; ctx.beginPath(); ctx.roundRect(bLeft,bTop,bw*(bDone/bTasks.length),bh,2); ctx.fill()
+    }
   })
 
-  // Centre node
-  const centreR = 52
-  ctx.beginPath()
-  ctx.arc(cx, cy, centreR, 0, Math.PI*2)
-  ctx.fillStyle = '#1a0a08'
-  ctx.fill()
-  ctx.strokeStyle = '#e8341c'
-  ctx.lineWidth = 2
-  ctx.stroke()
-
-  ctx.fillStyle = '#e8341c'
-  ctx.font = '700 11px Bebas Neue, DM Sans'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText('THIN', cx, cy - 10)
-  ctx.fillStyle = '#f2f0e8'
-  ctx.font = '700 15px Bebas Neue, DM Sans'
-  ctx.fillText('SLIZZY', cx, cy + 6)
-
-  // Done count
-  const doneCount = d.tasks.filter(t=>t.done).length
-  if(d.tasks.length > 0) {
-    ctx.fillStyle = 'rgba(78,203,110,0.6)'
-    ctx.font = '10px DM Mono, monospace'
-    ctx.fillText(doneCount+'/'+d.tasks.length+' done', cx, cy + 22)
+  // Centre
+  ctx.beginPath(); ctx.arc(cx,cy,50,0,Math.PI*2)
+  ctx.fillStyle='#1a0808'; ctx.fill()
+  ctx.strokeStyle='#e8341c'; ctx.lineWidth=2; ctx.stroke()
+  ctx.fillStyle='#e8341c'; ctx.font='700 13px Bebas Neue,sans-serif'
+  ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText('THIN',cx,cy-12)
+  ctx.fillStyle='#f2f0e8'; ctx.font='700 17px Bebas Neue,sans-serif'
+  ctx.fillText('SLIZZY',cx,cy+5)
+  if(d.revenue) {
+    ctx.fillStyle='rgba(78,203,110,0.7)'; ctx.font='10px DM Mono,monospace'
+    ctx.fillText('$'+Number(d.revenue).toLocaleString(),cx,cy+20)
   }
 }
 
-// Input handlers
-document.getElementById('modal-input').addEventListener('keydown',e=>{if(e.key==='Enter')saveModal()})
-document.getElementById('modal-schedule-text').addEventListener('keydown',e=>{if(e.key==='Enter')saveModal()})
-window.addEventListener('resize', ()=>{ if(currentView==='map') drawMap() })
-setInterval(render, 60000)
+window.addEventListener('resize',()=>{ if(currentView==='map') drawMap() })
+setInterval(()=>{ if(currentView==='map') drawMap() },60000)
 render()
 </script>
 </body>
