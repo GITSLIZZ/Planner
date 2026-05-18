@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Planner">
+<title>Daily Planner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0f;
+    --surface: #18181a;
+    --surface2: #222225;
+    --border: #2a2a2e;
+    --text: #f0efe8;
+    --muted: #6b6a66;
+    --purple: #9d8fff;
+    --purple-dim: #2a2640;
+    --purple-text: #c4baff;
+    --green: #4ecb8d;
+    --green-dim: #1a2e25;
+    --green-text: #7ddba8;
+    --amber: #f0a94a;
+    --amber-dim: #2e2210;
+    --red: #e05c5c;
+    --radius: 12px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: calc(var(--safe-top) + 1rem) 1.25rem calc(var(--safe-bottom) + 5rem);
+    min-height: 100dvh;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+  .date-block .day {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .date-block .title {
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-top: 2px;
+  }
+  .task-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    background: var(--green-dim);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-top: 4px;
+  }
+
+  /* Focus card */
+  .focus-card {
+    background: var(--purple-dim);
+    border: 1px solid #3d3660;
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .focus-card:active { border-color: var(--purple); }
+  .section-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 6px;
+  }
+  .focus-text {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--purple-text);
+    line-height: 1.4;
+  }
+
+  /* Sections */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .add-btn {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .add-btn:active { background: var(--border); color: var(--text); }
+
+  /* Tasks */
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .task-item:last-of-type { border-bottom: none; }
+  .check {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .check.done {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .check.done::after {
+    content: '';
+    width: 9px;
+    height: 5px;
+    border-left: 2px solid #0e0e0f;
+    border-bottom: 2px solid #0e0e0f;
+    transform: rotate(-45deg) translateY(-1px);
+    display: block;
+  }
+  .task-text {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text);
+    flex: 1;
+    transition: color 0.15s;
+  }
+  .task-text.done { color: var(--muted); text-decoration: line-through; }
+
+  /* Ideas */
+  .idea-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .idea-item:last-of-type { border-bottom: none; }
+  .idea-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #534AB7;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .idea-text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  /* Claude tip */
+  .claude-card {
+    background: var(--green-dim);
+    border: 1px solid #2a4a38;
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .claude-tip {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--green-text);
+    line-height: 1.6;
+  }
+  .claude-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 1rem;
+  }
+  .claude-btn:active { background: var(--surface); color: var(--text); }
+  .claude-btn.loading { color: var(--green); border-color: var(--green-dim); }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    padding: 1.5rem 1.25rem calc(var(--safe-bottom) + 1.5rem);
+    width: 100%;
+    max-width: 480px;
+    animation: slideUp 0.25s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal-title {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  .modal input, .modal textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    outline: none;
+    margin-bottom: 12px;
+    -webkit-appearance: none;
+  }
+  .modal input:focus, .modal textarea:focus { border-color: var(--purple); }
+  .modal textarea { resize: none; height: 80px; }
+  .modal-actions { display: flex; gap: 8px; }
+  .btn-primary {
+    flex: 1;
+    padding: 12px;
+    background: var(--purple);
+    border: none;
+    border-radius: 8px;
+    color: #0e0e0f;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-cancel {
+    padding: 12px 20px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* Setup banner */
+  .setup-banner {
+    background: var(--amber-dim);
+    border: 1px solid #4a3510;
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .setup-banner p { font-size: 13px; color: var(--amber); line-height: 1.5; margin-bottom: 8px; }
+  .setup-banner input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    outline: none;
+    margin-bottom: 8px;
+    -webkit-appearance: none;
+  }
+  .setup-banner button {
+    padding: 8px 16px;
+    background: var(--amber);
+    border: none;
+    border-radius: 6px;
+    color: #0e0e0f;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .empty { font-size: 13px; color: var(--muted); font-style: italic; padding: 4px 0; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <div id="setup-banner" class="setup-banner" style="display:none">
+    <p>Paste your Anthropic API key to enable Claude advice. It stays on your device only.</p>
+    <input type="password" id="key-input" placeholder="sk-ant-api03-..." />
+    <button onclick="saveKey()">Save key</button>
+  </div>
+
+  <div class="header">
+    <div class="date-block">
+      <div class="day" id="day-label"></div>
+      <div class="title">today's plan</div>
+    </div>
+    <div class="task-badge" id="task-badge">0/0 done</div>
+  </div>
+
+  <div class="focus-card" onclick="openModal('focus')">
+    <div class="section-tag">today's focus</div>
+    <div class="focus-text" id="focus-display">Tap to set your one thing for today</div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag" style="margin:0">tasks</div>
+      <div class="add-btn" onclick="openModal('task')">+</div>
+    </div>
+    <div id="task-list"><div class="empty">no tasks yet — tap + to add one</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-tag" style="margin:0">parked ideas</div>
+      <div class="add-btn" onclick="openModal('idea')">+</div>
+    </div>
+    <div id="idea-list"><div class="empty">no ideas yet — tap + to capture one</div></div>
+  </div>
+
+  <div class="claude-card">
+    <div class="section-tag" style="color:var(--green);margin-bottom:6px">claude</div>
+    <div class="claude-tip" id="claude-tip">Tap below to get your focus advice for right now.</div>
+  </div>
+
+  <button class="claude-btn" id="claude-btn" onclick="askClaude()">ask claude what to focus on</button>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Edit</div>
+    <input type="text" id="modal-input" style="display:none" />
+    <textarea id="modal-textarea" style="display:none"></textarea>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModalDirect()">Cancel</button>
+      <button class="btn-primary" onclick="saveModal()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'planner_v1'
+const API_KEY_STORAGE = 'planner_api_key'
+let modalMode = ''
+let editTaskIndex = -1
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch(e) {}
+  return {
+    focus: '',
+    tasks: [],
+    ideas: [],
+    lastTip: 'Tap below to get your focus advice for right now.'
+  }
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
+}
+
+function getKey() {
+  return localStorage.getItem(API_KEY_STORAGE) || ''
+}
+
+function saveKey() {
+  const val = document.getElementById('key-input').value.trim()
+  if (val.startsWith('sk-ant')) {
+    localStorage.setItem(API_KEY_STORAGE, val)
+    document.getElementById('setup-banner').style.display = 'none'
+    document.getElementById('key-input').value = ''
+  } else {
+    alert('That doesn\'t look right — key should start with sk-ant')
+  }
+}
+
+function render() {
+  const data = loadData()
+  const now = new Date()
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  document.getElementById('day-label').textContent = days[now.getDay()] + ' · ' + now.getDate() + ' ' + months[now.getMonth()]
+
+  document.getElementById('focus-display').textContent = data.focus || 'Tap to set your one thing for today'
+  document.getElementById('claude-tip').textContent = data.lastTip
+
+  const done = data.tasks.filter(t => t.done).length
+  document.getElementById('task-badge').textContent = `${done}/${data.tasks.length} done`
+
+  const taskList = document.getElementById('task-list')
+  if (data.tasks.length === 0) {
+    taskList.innerHTML = '<div class="empty">no tasks yet — tap + to add one</div>'
+  } else {
+    taskList.innerHTML = data.tasks.map((t, i) => `
+      <div class="task-item" onclick="toggleTask(${i})">
+        <div class="check ${t.done ? 'done' : ''}"></div>
+        <span class="task-text ${t.done ? 'done' : ''}">${t.text}</span>
+      </div>
+    `).join('')
+  }
+
+  const ideaList = document.getElementById('idea-list')
+  if (data.ideas.length === 0) {
+    ideaList.innerHTML = '<div class="empty">no ideas yet — tap + to capture one</div>'
+  } else {
+    ideaList.innerHTML = data.ideas.map(id => `
+      <div class="idea-item">
+        <div class="idea-dot"></div>
+        <span class="idea-text">${id}</span>
+      </div>
+    `).join('')
+  }
+
+  if (!getKey()) {
+    document.getElementById('setup-banner').style.display = 'block'
+  }
+}
+
+function toggleTask(i) {
+  const data = loadData()
+  data.tasks[i].done = !data.tasks[i].done
+  saveData(data)
+  render()
+}
+
+function openModal(mode, idx) {
+  modalMode = mode
+  editTaskIndex = idx !== undefined ? idx : -1
+  const data = loadData()
+  const overlay = document.getElementById('modal')
+  const input = document.getElementById('modal-input')
+  const textarea = document.getElementById('modal-textarea')
+
+  overlay.classList.add('open')
+
+  if (mode === 'focus') {
+    document.getElementById('modal-title').textContent = 'Today\'s focus'
+    textarea.style.display = 'block'
+    input.style.display = 'none'
+    textarea.value = data.focus || ''
+    textarea.placeholder = 'The one thing you\'re protecting time for today...'
+    setTimeout(() => textarea.focus(), 100)
+  } else if (mode === 'task') {
+    document.getElementById('modal-title').textContent = 'New task'
+    input.style.display = 'block'
+    textarea.style.display = 'none'
+    input.value = ''
+    input.placeholder = 'What needs doing today?'
+    setTimeout(() => input.focus(), 100)
+  } else if (mode === 'idea') {
+    document.getElementById('modal-title').textContent = 'Capture idea'
+    input.style.display = 'block'
+    textarea.style.display = 'none'
+    input.value = ''
+    input.placeholder = 'What\'s the idea? Park it, don\'t act yet.'
+    setTimeout(() => input.focus(), 100)
+  }
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) closeModalDirect()
+}
+
+function closeModalDirect() {
+  document.getElementById('modal').classList.remove('open')
+}
+
+function saveModal() {
+  const data = loadData()
+  const input = document.getElementById('modal-input').value.trim()
+  const textarea = document.getElementById('modal-textarea').value.trim()
+
+  if (modalMode === 'focus' && textarea) {
+    data.focus = textarea
+  } else if (modalMode === 'task' && input) {
+    data.tasks.push({ text: input, done: false })
+  } else if (modalMode === 'idea' && input) {
+    data.ideas.push(input)
+  }
+
+  saveData(data)
+  closeModalDirect()
+  render()
+}
+
+async function askClaude() {
+  const key = getKey()
+  if (!key) {
+    document.getElementById('setup-banner').style.display = 'block'
+    return
+  }
+
+  const btn = document.getElementById('claude-btn')
+  btn.textContent = 'asking claude...'
+  btn.classList.add('loading')
+  btn.disabled = true
+
+  const data = loadData()
+  const done = data.tasks.filter(t => t.done).length
+  const prompt = `You are a concise productivity coach for a solo freelancer.
+
+Their focus today: "${data.focus || 'not set'}"
+Tasks (${done}/${data.tasks.length} done): ${data.tasks.length ? data.tasks.map(t => (t.done ? 'done: ' : 'todo: ') + t.text).join(', ') : 'none yet'}
+Parked ideas: ${data.ideas.length ? data.ideas.join(', ') : 'none yet'}
+
+Give ONE sharp, actionable sentence (max 20 words) telling them what to focus on right now. No preamble, no fluff. Just the sentence.`
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 60,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    })
+    const json = await res.json()
+    if (json.content && json.content[0]) {
+      data.lastTip = json.content[0].text.trim()
+      saveData(data)
+      document.getElementById('claude-tip').textContent = data.lastTip
+    } else {
+      document.getElementById('claude-tip').textContent = 'Something went wrong — check your API key.'
+    }
+  } catch(e) {
+    document.getElementById('claude-tip').textContent = 'Could not reach Claude — check your connection.'
+  }
+
+  btn.textContent = 'ask claude what to focus on'
+  btn.classList.remove('loading')
+  btn.disabled = false
+}
+
+document.getElementById('modal-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveModal()
+})
+
+render()
+</script>
+</body>
+</html>
