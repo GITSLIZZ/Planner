@@ -499,7 +499,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
     <div class="sheet-handle"></div>
     <div class="modal-title" style="color:var(--purple)">Paste Text</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.5">Paste an email, message, note — anything. Claude will extract the tasks.</div>
-    <textarea class="sheet-textarea" id="paste-input" placeholder="Paste your email or text here..." style="height:140px"></textarea>
+    <textarea class="sheet-textarea" id="paste-input" placeholder="Tap and hold here, then choose Paste..." style="height:160px;font-size:13px" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-align:center;margin-top:-6px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.08em">tap and hold in the box above → paste</div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closePasteBox()">Cancel</button>
       <button class="btn-save" onclick="submitPasteText()" style="background:var(--purple);border-color:var(--purple)">Extract Tasks →</button>
@@ -1005,12 +1006,12 @@ async function processIngestFile(file){
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:msgContent}]})
     })
     const json=await resp.json()
-    if(!resp.ok)throw new Error(json.error?.message||'API error')
+    if(!resp.ok)throw new Error('HTTP '+resp.status+': '+(json?.error?.message||JSON.stringify(json).slice(0,200)))
     const text=json.content?.find(c=>c.type==='text')?.text||''
     const parsed=parseClaudeTaskResponse(text,file.name)
     renderReviewItems(parsed,file.name)
   } catch(err){
-    document.getElementById('review-body').innerHTML='<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red);margin-bottom:8px">Could not process file</div><div style="font-size:11px;color:var(--muted)">'+esc(err.message)+'</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>'
+    document.getElementById('review-body').innerHTML='<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red);margin-bottom:8px">Could not process file</div><div style="font-size:11px;color:var(--muted)">'+esc(String(err))+'  </div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>'
   }
 }
 
@@ -1142,15 +1143,15 @@ async function submitPasteText(){
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:buildPrompt('pasted text')+'\n\nTEXT:\n'+text.slice(0,8000)}]})
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:[{type:'text',text:buildPrompt('pasted text')+'\n\nTEXT:\n'+text.slice(0,8000)}]}]})
     })
     const json=await resp.json()
-    if(!resp.ok)throw new Error(json.error?.message||'API error')
+    if(!resp.ok)throw new Error('HTTP '+resp.status+': '+(json?.error?.message||JSON.stringify(json).slice(0,200)))
     const responseText=json.content?.find(c=>c.type==='text')?.text||''
     const parsed=parseClaudeTaskResponse(responseText,'pasted text')
     renderReviewItems(parsed,'pasted text')
   } catch(err){
-    document.getElementById('review-body').innerHTML='<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red)">Could not process</div><div style="font-size:11px;color:var(--muted)">'+esc(err.message)+'</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>'
+    document.getElementById('review-body').innerHTML='<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red)">Could not process</div><div style="font-size:11px;color:var(--muted)">'+esc(String(err))+'</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>'
   }
 }
 
