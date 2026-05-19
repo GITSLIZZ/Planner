@@ -386,7 +386,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
   <div class="tab" id="tab-calendar" onclick="switchTab('calendar',this)">
     <div class="tab-icon">📅</div><span class="tab-lbl">calendar</span>
   </div>
-  <div class="tab" onclick="openAddSheet()" style="flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:3px 0" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+  <div class="tab" onclick="openAddSheet()" style="flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:3px 0">
     <div class="dump-btn" id="dump-btn">+</div>
   </div>
   <div class="tab" id="tab-tentacles" onclick="switchTab('tentacles',this)">
@@ -428,6 +428,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
       <div class="opt-btn" data-val="month" onclick="pickOpt(this,'timeframe')">This month</div>
       <div class="opt-btn" data-val="someday" onclick="pickOpt(this,'timeframe')">Someday</div>
     </div>
+    <div class="field-label">Due date <span style="color:var(--muted);font-weight:300;text-transform:none;letter-spacing:0">(optional)</span></div>
+    <input type="date" id="task-date-input" class="sheet-input" style="margin-bottom:12px;color:var(--text);background:var(--s2)" />
     <button class="sheet-submit" onclick="saveTask()">Add Task →</button>
   </div>
 </div>
@@ -481,10 +483,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
       <span style="font-size:20px">✏️</span>
       <div><div style="font-weight:500">Add a task</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Create a task with tentacle, urgency & timeframe</div></div>
     </button>
-    <button onclick="closeAddSheet();document.getElementById('file-ingest').click()" style="width:100%;padding:13px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;text-align:left;margin-bottom:8px;display:flex;align-items:center;gap:10px">
-      <span style="font-size:20px">📎</span>
-      <div><div style="font-weight:500">Drop or upload a file</div><div style="font-size:11px;color:var(--muted);margin-top:2px">PDF, image, email — Claude extracts the tasks</div></div>
-    </button>
+
     <button onclick="closeAddSheet();openPasteBox()" style="width:100%;padding:13px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;text-align:left;margin-bottom:4px;display:flex;align-items:center;gap:10px">
       <span style="font-size:20px">📋</span>
       <div><div style="font-weight:500">Paste email or text</div><div style="font-size:11px;color:var(--muted);margin-top:2px">Copy from email, WhatsApp, notes — Claude reads it</div></div>
@@ -528,7 +527,6 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
   </div>
 </div>
 
-<input type="file" id="file-ingest" accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.webp,image/*,text/*,application/pdf" style="display:none" onchange="handleFileSelect(event)" />
 <div class="toast" id="toast">✓ <span id="toast-msg">Saved</span></div>
 
 <script>
@@ -579,6 +577,11 @@ let undoStack=[],activeTent=null,calView='month',calOffset=0,calEditIdx=null,map
 let _taskTent='ops',_taskUrgency='medium',_taskTimeframe='today'
 let _calStatus='pending'
 
+function formatDate(d){
+  if(!d)return ''
+  const dt=new Date(d+'T00:00:00')
+  return dt.toLocaleDateString('en-AU',{day:'numeric',month:'short'})
+}
 function getMood(p){return MOODS.find(m=>p<=m.t)||MOODS[MOODS.length-1]}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
@@ -684,7 +687,8 @@ function openTaskSheet(prefillTent){
   // Pre-select today
   const tfBtn=document.querySelector(`#timeframe-opts .opt-btn[data-val="today"]`)
   if(tfBtn)selectOptBtn(tfBtn,'#e8341c')
-  document.getElementById('task-overlay').classList.add('show')
+  document.getElementById('task-date-input').value=''
+document.getElementById('task-overlay').classList.add('show')
   setTimeout(()=>document.getElementById('task-text-input').focus(),100)
 }
 function closeTaskSheet(){document.getElementById('task-overlay').classList.remove('show')}
@@ -718,7 +722,7 @@ function pickOpt(el,group){
 function saveTask(){
   const v=document.getElementById('task-text-input').value.trim();if(!v){showToast('Add some text first');return}
   const s=snap();const d=load();pushUndo(s)
-  d.tasks.push({text:v,done:false,tent:_taskTent,urgency:_taskUrgency,timeframe:_taskTimeframe,created:Date.now()})
+  const taskDate=document.getElementById('task-date-input')?.value||'';d.tasks.push({text:v,done:false,tent:_taskTent,urgency:_taskUrgency,timeframe:_taskTimeframe,date:taskDate,created:Date.now()})
   save(d);document.getElementById('task-text-input').value=''
   closeTaskSheet();renderAll();showToast('Task added ✓')
 }
@@ -782,6 +786,7 @@ function renderTentDetail(){
         <div class="di-meta">
           <span class="sm-tag ${urgencyClass[item.urgency||'medium']}">${item.urgency||'medium'}</span>
           <span class="sm-tag ${timeframeClass[item.timeframe||'today']}">${item.timeframe||'today'}</span>
+          ${item.date?`<span class="sm-tag" style="background:rgba(74,158,255,0.08);color:var(--blue)">${formatDate(item.date)}</span>`:''}
         </div>
       </div>
       <span class="di-del" onclick="deleteTask(${item._i})">×</span>
@@ -968,167 +973,12 @@ function askClaude(){
 }
 
 
-// ── File ingest & review ──────────────────────
+// ── Review queue ──────────────────────────────
 let reviewItems = []
-
-function handleDragOver(e){e.preventDefault();const btn=document.getElementById('dump-btn');if(btn){btn.style.background='#a070ff';btn.style.transform='scale(1.1)'}}
-function handleDragLeave(e){const btn=document.getElementById('dump-btn');if(btn){btn.style.background='';btn.style.transform=''}}
-function handleDrop(e){
-  e.preventDefault();const btn=document.getElementById('dump-btn');if(btn){btn.style.background='';btn.style.transform=''}
-  const file=e.dataTransfer?.files[0];if(file)processIngestFile(file)
-}
-function handleFileSelect(e){const file=e.target.files[0];if(file)processIngestFile(file);e.target.value=''}
-
-async function processIngestFile(file){
-  const apiKey=localStorage.getItem(AK)
-  if(!apiKey){showToast('Set your API key first — tap API button');document.getElementById('api-banner').classList.add('show');return}
-  openReview()
-  setReviewLoading('Reading '+file.name+'...')
-  try{
-    let content=''
-    let msgContent=[]
-    if(file.type.startsWith('image/')||file.type==='application/pdf'){
-      const b64=await fileToBase64(file)
-      const mediaType=file.type==='application/pdf'?'application/pdf':file.type
-      if(file.type==='application/pdf'){
-        msgContent=[{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},{type:'text',text:buildPrompt(file.name)}]
-      } else {
-        msgContent=[{type:'image',source:{type:'base64',media_type:mediaType,data:b64}},{type:'text',text:buildPrompt(file.name)}]
-      }
-    } else {
-      content=await file.text()
-      msgContent=[{type:'text',text:buildPrompt(file.name)+'\n\nFILE CONTENT:\n'+content.slice(0,8000)}]
-    }
-    setReviewLoading('Claude is reading...')
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:msgContent}]})
-    })
-    const json=await resp.json()
-    if(!resp.ok)throw new Error('HTTP '+resp.status+': '+(json?.error?.message||JSON.stringify(json).slice(0,200)))
-    const text=json.content?.find(c=>c.type==='text')?.text||''
-    const parsed=parseClaudeTaskResponse(text,file.name)
-    renderReviewItems(parsed,file.name)
-  } catch(err){
-    document.getElementById('review-body').innerHTML='<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red);margin-bottom:8px">Could not process file</div><div style="font-size:11px;color:var(--muted)">'+esc(String(err))+'  </div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>'
-  }
-}
-
-function buildPrompt(filename){
-  return `You are helping organise a pizza shop called Thin Slizzy. Extract ALL actionable tasks, action items, to-dos, follow-ups, deadlines, and important information from this file (${filename}).
-
-Return ONLY a JSON array, no other text. Each item must have:
-- "text": the task or action item (clear, concise)
-- "tent": one of: ops, creative, people, growth, network
-- "urgency": one of: urgent, high, medium, low
-- "timeframe": one of: today, week, month, someday
-- "reason": one sentence explaining why this is a task
-
-Classify based on context. Ops = suppliers/kitchen/ordering. Creative = ideas/marketing/menu. People = staff/contacts. Growth = catering/expansion/goals. Network = outreach/collabs/partnerships.
-
-Example output:
-[{"text":"Call Chefco about flour order","tent":"ops","urgency":"high","timeframe":"today","reason":"Invoice shows overdue account"},{"text":"Reply to catering enquiry from Revolver","tent":"growth","urgency":"urgent","timeframe":"today","reason":"Event is next Friday"}]`
-}
-
-function fileToBase64(file){
-  return new Promise((res,rej)=>{
-    const r=new FileReader()
-    r.onload=()=>res(r.result.split(',')[1])
-    r.onerror=()=>rej(new Error('File read failed'))
-    r.readAsDataURL(file)
-  })
-}
-
-function parseClaudeTaskResponse(text,filename){
-  try{
-    const clean=text.replace(/```json|```/g,'').trim()
-    const arr=JSON.parse(clean)
-    if(Array.isArray(arr))return arr
-  }catch(e){}
-  // Fallback: try to find JSON array in text
-  const match=text.match(/\[[\s\S]*\]/)
-  if(match){try{return JSON.parse(match[0])}catch(e){}}
-  return [{text:'Review this file manually: '+filename,tent:'ops',urgency:'medium',timeframe:'today',reason:'Could not auto-extract tasks from this file'}]
-}
-
 function openReview(){document.getElementById('review-screen').classList.add('show')}
 function closeReview(){document.getElementById('review-screen').classList.remove('show');reviewItems=[]}
-function setReviewLoading(txt){
-  document.getElementById('review-loading-txt').textContent=txt
-  document.getElementById('review-loading').style.display='flex'
-}
+function setReviewLoading(txt){document.getElementById('review-loading-txt').textContent=txt;document.getElementById('review-loading').style.display='flex'}
 
-function renderReviewItems(items,filename){
-  reviewItems=items.map(item=>({...item,approved:true,discarded:false}))
-  document.getElementById('review-sub').textContent=items.length+' item'+(items.length!==1?'s':'')+' found in '+filename
-  document.getElementById('review-loading').style.display='none'
-  renderReviewList()
-}
-
-function renderReviewList(){
-  const TENT_COLORS={ops:'#e8341c',creative:'#a070ff',people:'#4a9eff',growth:'#4ecb6e',network:'#f0a020'}
-  const URGENCY_C={urgent:'#e8341c',high:'#f0a020',medium:'#4a9eff',low:'#6a6860'}
-  const TF_C={today:'#e8341c',week:'#f0a020',month:'#4a9eff',someday:'#6a6860'}
-
-  const approvedCount=reviewItems.filter(i=>i.approved&&!i.discarded).length
-  document.getElementById('review-save-btn').disabled=approvedCount===0
-  document.getElementById('review-save-btn').textContent='Save '+approvedCount+' approved task'+(approvedCount!==1?'s':'')+' →'
-
-  const TENTS_LIST=['ops','creative','people','growth','network']
-  const URG_LIST=['urgent','high','medium','low']
-  const TF_LIST=['today','week','month','someday']
-
-  document.getElementById('review-body').innerHTML=`
-    <div class="review-source"><strong>📎 Extracted tasks</strong>Edit text and settings, then approve or discard each one.</div>
-    ${reviewItems.map((item,idx)=>`
-      <div class="review-item ${item.discarded?'discarded':item.approved?'approved':''}" id="ri-${idx}">
-        <div class="review-item-hd">
-          <span class="review-item-num">${idx+1}</span>
-          <textarea class="review-item-text" id="ri-text-${idx}" onchange="updateReviewText(${idx},this.value)">${esc(item.text)}</textarea>
-        </div>
-        ${item.reason?`<div style="font-size:10px;color:var(--muted);font-style:italic;margin-bottom:8px;padding-left:20px">${esc(item.reason)}</div>`:''}
-        <div style="padding-left:20px">
-          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px">Tentacle</div>
-          <div class="review-meta-row">${TENTS_LIST.map(t=>`<button class="review-meta-btn ${item.tent===t?'sel':''}" style="${item.tent===t?'background:'+TENT_COLORS[t]+';border-color:'+TENT_COLORS[t]:''}" onclick="setReviewField(${idx},'tent','${t}')">${t}</button>`).join('')}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px">Urgency</div>
-          <div class="review-meta-row">${URG_LIST.map(u=>`<button class="review-meta-btn ${item.urgency===u?'sel':''}" style="${item.urgency===u?'background:'+URGENCY_C[u]+';border-color:'+URGENCY_C[u]:''}" onclick="setReviewField(${idx},'urgency','${u}')">${u}</button>`).join('')}</div>
-          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px">Timeframe</div>
-          <div class="review-meta-row">${TF_LIST.map(tf=>`<button class="review-meta-btn ${item.timeframe===tf?'sel':''}" style="${item.timeframe===tf?'background:'+TF_C[tf]+';border-color:'+TF_C[tf]:''}" onclick="setReviewField(${idx},'timeframe','${tf}')">${tf}</button>`).join('')}</div>
-          <div class="review-actions">
-            <button class="review-approve ${item.approved&&!item.discarded?'active':''}" onclick="setReviewApproval(${idx},true)">✓ approve</button>
-            <button class="review-discard ${item.discarded?'active':''}" onclick="setReviewApproval(${idx},false)">✕ discard</button>
-          </div>
-        </div>
-      </div>
-    `).join('')}
-  `
-}
-
-function updateReviewText(idx,val){reviewItems[idx].text=val}
-function setReviewField(idx,field,val){
-  reviewItems[idx][field]=val
-  if(field!=='text'){reviewItems[idx].approved=true;reviewItems[idx].discarded=false}
-  renderReviewList()
-}
-function setReviewApproval(idx,approve){
-  reviewItems[idx].approved=approve;reviewItems[idx].discarded=!approve
-  renderReviewList()
-}
-
-function saveApprovedItems(){
-  const toSave=reviewItems.filter(i=>i.approved&&!i.discarded&&i.text.trim())
-  if(!toSave.length)return
-  const s=snap();const d=load();pushUndo(s)
-  toSave.forEach(item=>{
-    d.tasks.push({text:item.text.trim(),done:false,tent:item.tent||'ops',urgency:item.urgency||'medium',timeframe:item.timeframe||'today',created:Date.now()})
-  })
-  save(d);closeReview();renderAll();showToast(toSave.length+' task'+(toSave.length!==1?'s':'')+' saved ✓')
-}
-
-
-function openAddSheet(){document.getElementById('add-choice-overlay').classList.add('show')}
-function closeAddSheet(){document.getElementById('add-choice-overlay').classList.remove('show')}
 function openPasteBox(){document.getElementById('paste-overlay').classList.add('show');setTimeout(()=>document.getElementById('paste-input').focus(),100)}
 function closePasteBox(){document.getElementById('paste-overlay').classList.remove('show')}
 async function submitPasteText(){
