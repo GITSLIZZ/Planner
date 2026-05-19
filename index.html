@@ -583,9 +583,15 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
 function setDailyQuote(){
-  const day=new Date().getDate()
-  const idx=day%QUOTES.length
-  document.getElementById('daily-quote').textContent='"'+QUOTES[idx]+'"'
+  try{
+    const day=new Date().getDate()
+    const idx=day%QUOTES.length
+    const el=document.getElementById('daily-quote')
+    if(el)el.textContent='"'+QUOTES[idx]+'"'
+  }catch(e){
+    const el=document.getElementById('daily-quote')
+    if(el)el.textContent='"Do the work nobody else wants to do."'
+  }
 }
 
 function load(){
@@ -990,10 +996,7 @@ async function processIngestFile(file){
       }
     } else {
       content=await file.text()
-      msgContent=[{type:'text',text:buildPrompt(file.name)+'
-
-FILE CONTENT:
-'+content.slice(0,8000)}]
+      msgContent=[{type:'text',text:buildPrompt(file.name)+'\n\nFILE CONTENT:\n'+content.slice(0,8000)}]
     }
     setReviewLoading('Claude is reading...')
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
@@ -1007,7 +1010,7 @@ FILE CONTENT:
     const parsed=parseClaudeTaskResponse(text,file.name)
     renderReviewItems(parsed,file.name)
   } catch(err){
-    document.getElementById('review-body').innerHTML=`<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red);margin-bottom:8px">Could not process file</div><div style="font-size:11px;color:var(--muted)">${esc(err.message)}</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>`
+    document.getElementById('review-body').innerHTML='<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red);margin-bottom:8px">Could not process file</div><div style="font-size:11px;color:var(--muted)">'+esc(err.message)+'</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>'
   }
 }
 
@@ -1147,7 +1150,7 @@ async function submitPasteText(){
     const parsed=parseClaudeTaskResponse(responseText,'pasted text')
     renderReviewItems(parsed,'pasted text')
   } catch(err){
-    document.getElementById('review-body').innerHTML=\`<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red);margin-bottom:8px">Could not process text</div><div style="font-size:11px;color:var(--muted)">\${esc(err.message)}</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>\`
+    document.getElementById('review-body').innerHTML='<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red)">Could not process</div><div style="font-size:11px;color:var(--muted)">'+esc(err.message)+'</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>'
   }
 }
 
@@ -1157,10 +1160,10 @@ function renderAll(){renderHome();renderTentGrid();if(activeTent)renderTentDetai
 const apiKey=localStorage.getItem(AK)
 if(apiKey){const btn=document.getElementById('api-btn');btn.textContent='API ✓';btn.classList.add('green')}
 window.addEventListener('resize',()=>{if(document.getElementById('v-map').classList.contains('active'))drawMap()})
-setDailyQuote()
-renderHome()
-renderTentGrid()
-initRoster()
+try{setDailyQuote()}catch(e){}
+try{renderHome()}catch(e){console.log('renderHome error',e)}
+try{renderTentGrid()}catch(e){console.log('renderTentGrid error',e)}
+try{initRoster()}catch(e){}
 </script>
 </body>
 </html>
