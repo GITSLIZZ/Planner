@@ -223,6 +223,40 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .api-banner p{font-size:12px;color:var(--amber);line-height:1.5;margin-bottom:8px}
 .api-banner input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:9px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;outline:none;margin-bottom:8px;-webkit-appearance:none}
 .api-banner button{padding:7px 14px;background:var(--amber);border:none;border-radius:8px;color:#0a0a08;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer}
+/* Drop zone */
+.drop-zone{border:1.5px dashed var(--b2);border-radius:var(--r);padding:16px;margin-bottom:12px;text-align:center;cursor:pointer;transition:all 0.2s;position:relative}
+.drop-zone.drag-over{border-color:var(--purple);background:rgba(160,112,255,0.06)}
+.drop-zone-icon{font-size:22px;margin-bottom:6px}
+.drop-zone-txt{font-size:12px;color:var(--muted);line-height:1.5}
+.drop-zone-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:4px;letter-spacing:0.06em;text-transform:uppercase}
+.review-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:250;flex-direction:column}
+.review-screen.show{display:flex}
+.review-hd{display:flex;align-items:center;justify-content:space-between;padding:calc(var(--st) + 12px) 1.25rem 12px;border-bottom:1px solid var(--b1);flex-shrink:0}
+.review-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.04em;color:var(--purple)}
+.review-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:0.08em}
+.review-body{flex:1;overflow-y:auto;padding:1rem 1.25rem}
+.review-source{background:var(--s1);border-radius:0 10px 10px 0;padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--muted);line-height:1.5;border-left:3px solid var(--purple)}
+.review-source strong{color:var(--text);display:block;margin-bottom:4px;font-size:12px}
+.review-item{background:var(--s1);border-radius:var(--r);padding:12px;margin-bottom:10px;border:1px solid var(--b1)}
+.review-item.approved{border-color:rgba(78,203,110,0.3)}
+.review-item.discarded{opacity:0.35}
+.review-item-hd{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
+.review-item-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);padding-top:3px;flex-shrink:0}
+.review-item-text{flex:1;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;line-height:1.4;min-height:40px;width:100%}
+.review-item-text:focus{border-color:rgba(160,112,255,0.4)}
+.review-meta-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.review-meta-btn{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;border-radius:12px;border:1px solid var(--b1);background:var(--s2);cursor:pointer;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;transition:all 0.15s}
+.review-meta-btn.sel{color:white}
+.review-actions{display:flex;gap:6px}
+.review-approve{flex:1;padding:8px;background:rgba(78,203,110,0.1);border:1px solid rgba(78,203,110,0.3);border-radius:9px;color:var(--green);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;text-transform:uppercase;letter-spacing:0.06em}
+.review-approve.active{background:var(--green);color:#0a0a08;border-color:var(--green)}
+.review-discard{padding:8px 12px;background:transparent;border:1px solid var(--b1);border-radius:9px;color:var(--muted);font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;text-transform:uppercase;letter-spacing:0.06em}
+.review-discard.active{background:rgba(232,52,28,0.1);border-color:rgba(232,52,28,0.2);color:var(--red)}
+.review-footer{padding:1rem 1.25rem calc(var(--sb) + 1rem);border-top:1px solid var(--b1);flex-shrink:0}
+.review-save-btn{width:100%;padding:13px;background:var(--green);border:none;border-radius:var(--r);color:#0a0a08;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.06em;cursor:pointer}
+.review-save-btn:disabled{background:var(--s3);color:var(--muted);cursor:not-allowed}
+.spin{width:32px;height:32px;border:3px solid var(--b2);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -250,6 +284,12 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
         <p>Paste your Anthropic API key. Stored on your device only.</p>
         <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." />
         <button onclick="saveApiKey()">Save key</button>
+      </div>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-ingest').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <div class="drop-zone-icon">📎</div>
+        <div class="drop-zone-txt">Drop a file here to extract tasks<br><span style="color:var(--purple)">emails, PDFs, images, notes</span></div>
+        <div class="drop-zone-sub">or tap to choose a file</div>
+        <input type="file" id="file-ingest" accept=".txt,.pdf,.png,.jpg,.jpeg,.gif,.webp,image/*,text/*,application/pdf" style="display:none" onchange="handleFileSelect(event)" />
       </div>
       <div class="prog-block">
         <div class="prog-top">
@@ -434,6 +474,27 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
     <span class="mono" style="font-size:9px;color:var(--muted)" id="fs-roster-lbl"></span>
   </div>
   <div class="fs-body"><img id="fs-roster-img" src="" alt="Roster" style="max-width:100%;max-height:100%;border-radius:12px;object-fit:contain" /></div>
+</div>
+
+
+<!-- Review screen -->
+<div class="review-screen" id="review-screen">
+  <div class="review-hd">
+    <div>
+      <div class="review-title">Review Queue</div>
+      <div class="review-sub" id="review-sub">0 items found</div>
+    </div>
+    <button class="hbtn" onclick="closeReview()">✕ discard all</button>
+  </div>
+  <div class="review-body" id="review-body">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;gap:12px" id="review-loading">
+      <div class="spin"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em" id="review-loading-txt">Reading file...</div>
+    </div>
+  </div>
+  <div class="review-footer">
+    <button class="review-save-btn" id="review-save-btn" onclick="saveApprovedItems()" disabled>Save approved tasks →</button>
+  </div>
 </div>
 
 <div class="toast" id="toast">✓ <span id="toast-msg">Saved</span></div>
@@ -866,6 +927,168 @@ function askClaude(){
   const urgentTasks=tasks.filter(t=>!t.done&&t.urgency==='urgent').map(t=>t.text).join(', ')
   const msg=`I'm Scott, owner of Thin Slizzy — rock n roll pizzeria at 115 Johnston St Collingwood, next to The Tote. Solo operator, ~$18k/week revenue, casual staff weekends.\n\nTonight's focus: ${d.focus||'not set'}\nTasks: ${done}/${tasks.length} done\n${urgentTasks?'URGENT tasks: '+urgentTasks:''}\nTentacles: ${ts}\nUpcoming events: ${(d.events||[]).slice(0,3).map(e=>e.name).join(', ')||'none'}\n\nWhat should I focus on right now? What am I missing?`
   window.open('https://claude.ai/new?q='+encodeURIComponent(msg),'_blank')
+}
+
+
+// ── File ingest & review ──────────────────────
+let reviewItems = []
+
+function handleDragOver(e){e.preventDefault();document.getElementById('drop-zone').classList.add('drag-over')}
+function handleDragLeave(e){document.getElementById('drop-zone').classList.remove('drag-over')}
+function handleDrop(e){
+  e.preventDefault();document.getElementById('drop-zone').classList.remove('drag-over')
+  const file=e.dataTransfer?.files[0];if(file)processIngestFile(file)
+}
+function handleFileSelect(e){const file=e.target.files[0];if(file)processIngestFile(file);e.target.value=''}
+
+async function processIngestFile(file){
+  const apiKey=localStorage.getItem(AK)
+  if(!apiKey){showToast('Set your API key first — tap API button');document.getElementById('api-banner').classList.add('show');return}
+  openReview()
+  setReviewLoading('Reading '+file.name+'...')
+  try{
+    let content=''
+    let msgContent=[]
+    if(file.type.startsWith('image/')||file.type==='application/pdf'){
+      const b64=await fileToBase64(file)
+      const mediaType=file.type==='application/pdf'?'application/pdf':file.type
+      if(file.type==='application/pdf'){
+        msgContent=[{type:'document',source:{type:'base64',media_type:'application/pdf',data:b64}},{type:'text',text:buildPrompt(file.name)}]
+      } else {
+        msgContent=[{type:'image',source:{type:'base64',media_type:mediaType,data:b64}},{type:'text',text:buildPrompt(file.name)}]
+      }
+    } else {
+      content=await file.text()
+      msgContent=[{type:'text',text:buildPrompt(file.name)+'
+
+FILE CONTENT:
+'+content.slice(0,8000)}]
+    }
+    setReviewLoading('Claude is reading...')
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:msgContent}]})
+    })
+    const json=await resp.json()
+    if(!resp.ok)throw new Error(json.error?.message||'API error')
+    const text=json.content?.find(c=>c.type==='text')?.text||''
+    const parsed=parseClaudeTaskResponse(text,file.name)
+    renderReviewItems(parsed,file.name)
+  } catch(err){
+    document.getElementById('review-body').innerHTML=`<div style="padding:20px;text-align:center"><div style="font-size:13px;color:var(--red);margin-bottom:8px">Could not process file</div><div style="font-size:11px;color:var(--muted)">${esc(err.message)}</div><button onclick="closeReview()" style="margin-top:16px;padding:8px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer">close</button></div>`
+  }
+}
+
+function buildPrompt(filename){
+  return `You are helping organise a pizza shop called Thin Slizzy. Extract ALL actionable tasks, action items, to-dos, follow-ups, deadlines, and important information from this file (${filename}).
+
+Return ONLY a JSON array, no other text. Each item must have:
+- "text": the task or action item (clear, concise)
+- "tent": one of: ops, creative, people, growth, network
+- "urgency": one of: urgent, high, medium, low
+- "timeframe": one of: today, week, month, someday
+- "reason": one sentence explaining why this is a task
+
+Classify based on context. Ops = suppliers/kitchen/ordering. Creative = ideas/marketing/menu. People = staff/contacts. Growth = catering/expansion/goals. Network = outreach/collabs/partnerships.
+
+Example output:
+[{"text":"Call Chefco about flour order","tent":"ops","urgency":"high","timeframe":"today","reason":"Invoice shows overdue account"},{"text":"Reply to catering enquiry from Revolver","tent":"growth","urgency":"urgent","timeframe":"today","reason":"Event is next Friday"}]`
+}
+
+function fileToBase64(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader()
+    r.onload=()=>res(r.result.split(',')[1])
+    r.onerror=()=>rej(new Error('File read failed'))
+    r.readAsDataURL(file)
+  })
+}
+
+function parseClaudeTaskResponse(text,filename){
+  try{
+    const clean=text.replace(/```json|```/g,'').trim()
+    const arr=JSON.parse(clean)
+    if(Array.isArray(arr))return arr
+  }catch(e){}
+  // Fallback: try to find JSON array in text
+  const match=text.match(/\[[\s\S]*\]/)
+  if(match){try{return JSON.parse(match[0])}catch(e){}}
+  return [{text:'Review this file manually: '+filename,tent:'ops',urgency:'medium',timeframe:'today',reason:'Could not auto-extract tasks from this file'}]
+}
+
+function openReview(){document.getElementById('review-screen').classList.add('show')}
+function closeReview(){document.getElementById('review-screen').classList.remove('show');reviewItems=[]}
+function setReviewLoading(txt){
+  document.getElementById('review-loading-txt').textContent=txt
+  document.getElementById('review-loading').style.display='flex'
+}
+
+function renderReviewItems(items,filename){
+  reviewItems=items.map(item=>({...item,approved:true,discarded:false}))
+  document.getElementById('review-sub').textContent=items.length+' item'+(items.length!==1?'s':'')+' found in '+filename
+  document.getElementById('review-loading').style.display='none'
+  renderReviewList()
+}
+
+function renderReviewList(){
+  const TENT_COLORS={ops:'#e8341c',creative:'#a070ff',people:'#4a9eff',growth:'#4ecb6e',network:'#f0a020'}
+  const URGENCY_C={urgent:'#e8341c',high:'#f0a020',medium:'#4a9eff',low:'#6a6860'}
+  const TF_C={today:'#e8341c',week:'#f0a020',month:'#4a9eff',someday:'#6a6860'}
+
+  const approvedCount=reviewItems.filter(i=>i.approved&&!i.discarded).length
+  document.getElementById('review-save-btn').disabled=approvedCount===0
+  document.getElementById('review-save-btn').textContent='Save '+approvedCount+' approved task'+(approvedCount!==1?'s':'')+' →'
+
+  const TENTS_LIST=['ops','creative','people','growth','network']
+  const URG_LIST=['urgent','high','medium','low']
+  const TF_LIST=['today','week','month','someday']
+
+  document.getElementById('review-body').innerHTML=`
+    <div class="review-source"><strong>📎 Extracted tasks</strong>Edit text and settings, then approve or discard each one.</div>
+    ${reviewItems.map((item,idx)=>`
+      <div class="review-item ${item.discarded?'discarded':item.approved?'approved':''}" id="ri-${idx}">
+        <div class="review-item-hd">
+          <span class="review-item-num">${idx+1}</span>
+          <textarea class="review-item-text" id="ri-text-${idx}" onchange="updateReviewText(${idx},this.value)">${esc(item.text)}</textarea>
+        </div>
+        ${item.reason?`<div style="font-size:10px;color:var(--muted);font-style:italic;margin-bottom:8px;padding-left:20px">${esc(item.reason)}</div>`:''}
+        <div style="padding-left:20px">
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px">Tentacle</div>
+          <div class="review-meta-row">${TENTS_LIST.map(t=>`<button class="review-meta-btn ${item.tent===t?'sel':''}" style="${item.tent===t?'background:'+TENT_COLORS[t]+';border-color:'+TENT_COLORS[t]:''}" onclick="setReviewField(${idx},'tent','${t}')">${t}</button>`).join('')}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px">Urgency</div>
+          <div class="review-meta-row">${URG_LIST.map(u=>`<button class="review-meta-btn ${item.urgency===u?'sel':''}" style="${item.urgency===u?'background:'+URGENCY_C[u]+';border-color:'+URGENCY_C[u]:''}" onclick="setReviewField(${idx},'urgency','${u}')">${u}</button>`).join('')}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:5px">Timeframe</div>
+          <div class="review-meta-row">${TF_LIST.map(tf=>`<button class="review-meta-btn ${item.timeframe===tf?'sel':''}" style="${item.timeframe===tf?'background:'+TF_C[tf]+';border-color:'+TF_C[tf]:''}" onclick="setReviewField(${idx},'timeframe','${tf}')">${tf}</button>`).join('')}</div>
+          <div class="review-actions">
+            <button class="review-approve ${item.approved&&!item.discarded?'active':''}" onclick="setReviewApproval(${idx},true)">✓ approve</button>
+            <button class="review-discard ${item.discarded?'active':''}" onclick="setReviewApproval(${idx},false)">✕ discard</button>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  `
+}
+
+function updateReviewText(idx,val){reviewItems[idx].text=val}
+function setReviewField(idx,field,val){
+  reviewItems[idx][field]=val
+  if(field!=='text'){reviewItems[idx].approved=true;reviewItems[idx].discarded=false}
+  renderReviewList()
+}
+function setReviewApproval(idx,approve){
+  reviewItems[idx].approved=approve;reviewItems[idx].discarded=!approve
+  renderReviewList()
+}
+
+function saveApprovedItems(){
+  const toSave=reviewItems.filter(i=>i.approved&&!i.discarded&&i.text.trim())
+  if(!toSave.length)return
+  const s=snap();const d=load();pushUndo(s)
+  toSave.forEach(item=>{
+    d.tasks.push({text:item.text.trim(),done:false,tent:item.tent||'ops',urgency:item.urgency||'medium',timeframe:item.timeframe||'today',created:Date.now()})
+  })
+  save(d);closeReview();renderAll();showToast(toSave.length+' task'+(toSave.length!==1?'s':'')+' saved ✓')
 }
 
 function renderAll(){renderHome();renderTentGrid();if(activeTent)renderTentDetail();if(document.getElementById('v-map').classList.contains('active'))drawMap()}
