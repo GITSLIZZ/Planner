@@ -38,6 +38,12 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .empty{font-size:12px;color:var(--muted);font-style:italic;padding:8px 0}
 .sm-tag{font-family:'DM Mono',monospace;font-size:9px;padding:1px 7px;border-radius:4px;display:inline-block}
 .pill-btn{font-family:'DM Mono',monospace;font-size:9px;padding:3px 10px;border-radius:20px;cursor:pointer;border:1px solid var(--b1);color:var(--muted);background:transparent}
+
+/* Quote */
+.quote-bar{background:var(--s1);border-bottom:1px solid var(--b1);padding:8px 1.25rem;flex-shrink:0}
+.quote-txt{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);font-style:italic;line-height:1.4;letter-spacing:0.02em}
+
+/* Progress */
 .prog-block{background:var(--s1);border-radius:var(--r);padding:14px;margin-bottom:12px}
 .prog-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .prog-num{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;transition:color 0.4s}
@@ -49,28 +55,39 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .week-row{display:flex;justify-content:space-between;margin-bottom:4px}
 .week-track{height:4px;background:var(--s3);border-radius:2px;overflow:hidden}
 .week-fill{height:100%;border-radius:2px;background:var(--amber);transition:width 0.4s}
+
+/* Focus */
 .focus-card{background:#1a0808;border-left:3px solid var(--red);border-radius:0 var(--r) var(--r) 0;padding:10px 14px;margin-bottom:12px;cursor:pointer;border-top:1px solid #2a1208;border-right:1px solid #2a1208;border-bottom:1px solid #2a1208}
 .focus-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--red);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px}
 .focus-txt{font-size:13px;color:#f0a090;line-height:1.4}
-.quick-add{display:flex;gap:6px;margin-bottom:8px}
-.qa-input{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
-.qa-input::placeholder{color:var(--muted)}
-.qa-input:focus{border-color:rgba(232,52,28,0.4)}
-.qa-btn{background:var(--red);border:none;border-radius:10px;padding:9px 14px;color:white;font-size:20px;cursor:pointer;flex-shrink:0}
-.cat-row{display:flex;gap:5px;margin-bottom:10px;overflow-x:auto;padding-bottom:2px}
-.cat-row::-webkit-scrollbar{display:none}
-.cat-chip{font-family:'DM Mono',monospace;font-size:9px;padding:3px 9px;border-radius:20px;border:1px solid var(--b1);color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;text-transform:uppercase;letter-spacing:0.05em;transition:all 0.15s}
-.cat-chip.sel{color:white}
-.task-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--b1)}
+
+/* Task items */
+.task-item{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid var(--b1)}
 .task-item:last-child{border-bottom:none}
-.chk{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--b2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;cursor:pointer}
+.task-item.urgent-high{border-left:2px solid var(--red);padding-left:8px;margin-left:-10px}
+.chk{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--b2);flex-shrink:0;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all 0.15s;cursor:pointer}
 .chk.done{background:var(--green);border-color:var(--green)}
 .chk.done::after{content:'';width:9px;height:5px;border-left:2px solid #0a0a08;border-bottom:2px solid #0a0a08;transform:rotate(-45deg) translateY(-1px);display:block}
 .task-body{flex:1;min-width:0}
 .task-txt{font-size:13px;color:var(--text);line-height:1.4;cursor:pointer}
 .task-txt.done{color:var(--muted);text-decoration:line-through}
-.task-del{color:var(--muted);font-size:15px;cursor:pointer;padding:0 2px;line-height:1}
+.task-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;align-items:center}
+.task-del{color:var(--muted);font-size:15px;cursor:pointer;padding:0 2px;line-height:1;flex-shrink:0}
 .task-del:active{color:var(--red)}
+
+/* Urgency colours */
+.u-urgent{background:rgba(232,52,28,0.15);color:#e8341c}
+.u-high{background:rgba(240,160,32,0.15);color:#f0a020}
+.u-medium{background:rgba(74,158,255,0.12);color:#4a9eff}
+.u-low{background:rgba(106,104,96,0.15);color:#6a6860}
+
+/* Timeframe colours */
+.tf-today{background:rgba(232,52,28,0.08);color:var(--red)}
+.tf-week{background:rgba(240,160,32,0.08);color:var(--amber)}
+.tf-month{background:rgba(74,158,255,0.08);color:var(--blue)}
+.tf-someday{background:rgba(106,104,96,0.1);color:var(--muted)}
+
+/* Tentacles */
 .tent-grid{display:flex;flex-direction:column;gap:10px;padding:1rem 1.25rem calc(var(--sb) + 5rem);overflow-y:auto;flex:1}
 .tent-card{border-radius:var(--r);padding:13px 14px;cursor:pointer;border:1px solid transparent;transition:transform 0.15s}
 .tent-card:active{transform:scale(0.98)}
@@ -90,21 +107,25 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .stat-box{background:var(--s2);border-radius:10px;padding:8px;text-align:center}
 .stat-val{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1}
 .stat-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin-top:2px}
-.detail-item{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--b1)}
+.detail-item{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--b1)}
 .detail-item:last-child{border-bottom:none}
-.di-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.di-txt{font-size:13px;color:var(--text);flex:1;line-height:1.4}
-.di-done{color:var(--muted);text-decoration:line-through}
-.di-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s}
+.di-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.di-body{flex:1;min-width:0}
+.di-txt{font-size:13px;color:var(--text);line-height:1.4}
+.di-txt.done{color:var(--muted);text-decoration:line-through}
+.di-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.di-chk{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.15s;margin-top:2px}
 .di-chk.done{background:var(--green);border-color:var(--green)}
 .di-chk.done::after{content:'';width:7px;height:4px;border-left:1.5px solid #0a0a08;border-bottom:1.5px solid #0a0a08;transform:rotate(-45deg) translateY(-1px);display:block}
-.di-add{font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.di-del{color:var(--muted);font-size:14px;cursor:pointer;padding:0 2px}
+.di-add{font-family:'DM Mono',monospace;font-size:9px;padding:2px 8px;border-radius:6px;cursor:pointer;white-space:nowrap;flex-shrink:0;margin-top:2px}
+.di-del{color:var(--muted);font-size:14px;cursor:pointer;padding:0 2px;flex-shrink:0;margin-top:2px}
 .di-del:active{color:var(--red)}
 .detail-add-row{display:flex;gap:6px;margin-top:10px}
 .detail-add-input{flex:1;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:8px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
 .detail-add-input::placeholder{color:var(--muted)}
 .detail-add-btn{background:var(--red);border:none;border-radius:10px;padding:8px 13px;color:white;font-size:18px;cursor:pointer}
+
+/* Calendar */
 .cal-toggle{display:flex;gap:6px;margin-bottom:12px}
 .cal-tab{flex:1;padding:6px;border-radius:9px;text-align:center;cursor:pointer;border:1px solid var(--b1);font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em}
 .cal-tab.act{background:rgba(160,112,255,0.12);border-color:rgba(160,112,255,0.3);color:var(--purple)}
@@ -114,12 +135,22 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .cal-days-hd{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:3px}
 .cal-dlbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-align:center;padding:3px 0;text-transform:uppercase}
 .cal-cells{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:16px}
-.cal-cell{border-radius:8px;padding:3px;min-height:34px;cursor:pointer;text-align:center}
+.cal-cell{border-radius:8px;padding:3px;min-height:38px;cursor:pointer;text-align:center}
 .cal-cell:active{background:var(--s2)}
 .cal-cnum{font-size:11px;color:var(--muted);line-height:2}
 .cal-cnum.today-num{background:var(--red);color:white;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:10px;font-weight:500}
 .cal-cnum.has-event{color:var(--text)}
 .cal-cdot{width:4px;height:4px;border-radius:50%;margin:2px auto 0}
+
+/* Weekly view */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px}
+.week-day-col{display:flex;flex-direction:column;gap:3px}
+.week-day-hd{text-align:center;padding:4px 2px;border-radius:6px}
+.week-day-name{font-family:'DM Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase}
+.week-day-num{font-size:12px;color:var(--muted);margin-top:1px}
+.week-day-num.today-num{background:var(--red);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin:2px auto 0;font-size:10px}
+.week-event-dot{font-size:8px;padding:2px 3px;border-radius:4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;line-height:1.3}
+
 .cal-event-item{display:flex;gap:12px;padding:9px 0;border-bottom:1px solid var(--b1);cursor:pointer}
 .cal-event-item:last-child{border-bottom:none}
 .cal-edate{width:30px;text-align:center;flex-shrink:0}
@@ -129,6 +160,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .cal-edetail{font-size:11px;color:var(--muted);margin-top:2px}
 .cal-eurgent{font-size:10px;color:#ff6b6b;margin-top:2px}
 .cal-estatus{font-family:'DM Mono',monospace;font-size:8px;padding:1px 6px;border-radius:4px;display:inline-block;margin-top:3px}
+
+/* Roster */
 .roster-wrap{margin-top:4px}
 .roster-card{background:var(--s1);border:1px solid var(--b1);border-radius:var(--r);overflow:hidden;margin-bottom:8px;cursor:pointer}
 .roster-img-wrap{width:100%;min-height:140px;display:flex;align-items:center;justify-content:center;background:var(--s2);position:relative}
@@ -140,8 +173,12 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .roster-empty-txt{font-size:12px;color:var(--muted);text-align:center;line-height:1.5}
 .upload-btn{width:100%;padding:11px;background:rgba(74,158,255,0.08);border:1px solid rgba(74,158,255,0.2);border-radius:var(--r);color:var(--blue);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:8px}
 .retake-btn{width:100%;padding:9px;background:transparent;border:1px solid var(--b1);border-radius:var(--r);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer}
+
+/* Map */
 .map-wrap{flex:1;position:relative;overflow:hidden;min-height:0}
 #map-canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;cursor:pointer}
+
+/* Tab bar */
 .tab-bar{display:flex;background:var(--bg);border-top:1px solid var(--b1);padding:7px 0 calc(var(--sb) + 9px);flex-shrink:0}
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:3px 0}
 .tab-icon{font-size:20px;color:var(--muted);transition:color 0.15s}
@@ -149,10 +186,12 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .tab-lbl{font-family:'DM Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:0.05em;text-transform:uppercase;transition:color 0.15s}
 .tab-lbl.act{color:var(--red)}
 .dump-btn{width:38px;height:38px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;margin-top:-12px;border:3px solid var(--bg);font-size:22px;color:white;cursor:pointer;flex-shrink:0}
+
+/* Overlays */
 .overlay{display:none;position:fixed;inset:0;z-index:100;align-items:flex-end;justify-content:center}
 .overlay.show{display:flex}
 .overlay-bg{position:absolute;inset:0;background:rgba(0,0,0,0.7)}
-.sheet{position:relative;z-index:1;background:var(--s1);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:16px 16px calc(var(--sb) + 20px);animation:slideUp 0.22s ease}
+.sheet{position:relative;z-index:1;background:var(--s1);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:16px 16px calc(var(--sb) + 20px);animation:slideUp 0.22s ease;max-height:92dvh;overflow-y:auto}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .sheet-handle{width:32px;height:3px;background:var(--b2);border-radius:2px;margin:0 auto 13px}
 .sheet-title{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;text-align:center;margin-bottom:11px}
@@ -161,10 +200,12 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 .sheet-input:focus{border-color:rgba(232,52,28,0.4)}
 .sheet-textarea{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:11px;padding:11px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;resize:none;height:70px;line-height:1.5;margin-bottom:10px;-webkit-appearance:none}
 .sheet-textarea:focus{border-color:rgba(232,52,28,0.4)}
-.tent-picker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px}
-.tent-pick{padding:8px 6px;border-radius:11px;border:1px solid var(--b1);background:var(--s2);cursor:pointer;text-align:center;font-size:12px;font-weight:500;transition:all 0.15s}
-.sheet-submit{width:100%;padding:12px;background:var(--red);border:none;border-radius:12px;color:white;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em;cursor:pointer}
-.modal-actions{display:flex;gap:8px;margin-top:4px}
+.field-label{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px}
+.option-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.opt-btn{font-family:'DM Mono',monospace;font-size:10px;padding:5px 11px;border-radius:20px;border:1px solid var(--b1);background:var(--s2);cursor:pointer;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;transition:all 0.15s}
+.opt-btn.sel{color:white}
+.sheet-submit{width:100%;padding:12px;background:var(--red);border:none;border-radius:12px;color:white;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em;cursor:pointer;margin-top:4px}
+.modal-actions{display:flex;gap:8px;margin-top:8px}
 .btn-save{flex:1;padding:12px;background:var(--red);border:none;border-radius:10px;color:white;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.06em;cursor:pointer}
 .btn-cancel{padding:12px 18px;background:transparent;border:1px solid var(--b1);border-radius:10px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
 .modal-input{width:100%;background:var(--s2);border:1px solid var(--b1);border-radius:10px;padding:11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;margin-bottom:10px;-webkit-appearance:none}
@@ -196,6 +237,10 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
   </div>
 </div>
 
+<div class="quote-bar">
+  <div class="quote-txt" id="daily-quote">Loading...</div>
+</div>
+
 <div class="content">
 
   <!-- HOME -->
@@ -210,14 +255,14 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
         <div class="prog-top">
           <div>
             <div class="prog-num" id="prog-num">0</div>
-            <div class="prog-lbl">actionable tasks done</div>
+            <div class="prog-lbl">tasks completed</div>
           </div>
           <div class="mood" id="mood">😴</div>
         </div>
         <div class="pb-track"><div class="pb-fill" id="pb-fill" style="width:0%;background:#555"><span class="pb-pct" id="pb-pct">0%</span></div></div>
         <div class="week-row">
-          <span class="mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Weekly tentacles</span>
-          <span class="mono" style="font-size:9px;color:var(--amber)" id="week-val">0 items</span>
+          <span class="mono" style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Weekly progress</span>
+          <span class="mono" style="font-size:9px;color:var(--amber)" id="week-val">0 / 0</span>
         </div>
         <div class="week-track"><div class="week-fill" id="week-fill" style="width:0%"></div></div>
       </div>
@@ -225,22 +270,11 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
         <div class="focus-lbl">Tonight's focus</div>
         <div class="focus-txt" id="focus-txt">Tap to set your one thing</div>
       </div>
-      <div class="row-bw" style="margin-bottom:8px">
+      <div class="row-bw" style="margin-bottom:10px">
         <div class="slabel" style="margin:0">Actionable tasks</div>
-        <span class="mono" style="font-size:9px;color:var(--muted)" id="task-count">0 tasks</span>
+        <span class="mono" style="font-size:9px;color:var(--muted)" id="task-count-lbl">0 tasks</span>
       </div>
-      <div class="quick-add">
-        <input class="qa-input" id="qa-input" placeholder="Add a task..." />
-        <button class="qa-btn" onclick="quickAdd()">+</button>
-      </div>
-      <div class="cat-row" id="cat-row">
-        <div class="cat-chip sel" data-cat="ops" style="background:var(--red);border-color:var(--red);color:white" onclick="selectCat(this)">Ops</div>
-        <div class="cat-chip" data-cat="creative" style="color:var(--purple)" onclick="selectCat(this)">Creative</div>
-        <div class="cat-chip" data-cat="people" style="color:var(--blue)" onclick="selectCat(this)">People</div>
-        <div class="cat-chip" data-cat="growth" style="color:var(--green)" onclick="selectCat(this)">Growth</div>
-        <div class="cat-chip" data-cat="network" style="color:var(--amber)" onclick="selectCat(this)">Network</div>
-      </div>
-      <div id="task-list"><div class="empty">No tasks yet — add one above or use the + button</div></div>
+      <div id="task-list"><div class="empty">No tasks yet — tap + to add one</div></div>
     </div>
   </div>
 
@@ -256,7 +290,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
         <button class="pill-btn" onclick="openCalModal()" style="color:var(--purple);border-color:rgba(160,112,255,0.25)">+ event</button>
       </div>
       <div id="cal-grid-wrap"></div>
-      <div class="slabel" style="margin-top:14px">Events</div>
+      <div class="slabel" style="margin-top:4px">Events</div>
       <div id="cal-event-list"><div class="empty">No events yet</div></div>
       <div class="slabel" style="margin-top:16px">Weekly roster</div>
       <div id="roster-empty" class="roster-wrap">
@@ -298,7 +332,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
       <div class="detail-hd">
         <span class="detail-back" id="tent-back-btn" onclick="closeTentDetail()">← tentacles</span>
         <span class="detail-title" id="tent-detail-title">Ops</span>
-        <button class="pill-btn" id="tent-add-btn" onclick="openTentAddSheet()">+ add</button>
+        <button class="pill-btn" id="tent-add-btn" onclick="openTaskSheet(null)">+ add</button>
       </div>
       <div class="detail-body" id="tent-detail-body"></div>
     </div>
@@ -318,7 +352,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
   <div class="tab" id="tab-calendar" onclick="switchTab('calendar',this)">
     <div class="tab-icon">📅</div><span class="tab-lbl">calendar</span>
   </div>
-  <div class="tab" onclick="openDump()" style="flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:3px 0">
+  <div class="tab" onclick="openTaskSheet(null)" style="flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:3px 0">
     <div class="dump-btn">+</div>
   </div>
   <div class="tab" id="tab-tentacles" onclick="switchTab('tentacles',this)">
@@ -331,25 +365,40 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 
 </div>
 
-<!-- Overlays -->
-<div class="overlay" id="dump-overlay">
-  <div class="overlay-bg" onclick="closeDump()"></div>
+<!-- Universal Task Sheet -->
+<div class="overlay" id="task-overlay">
+  <div class="overlay-bg" onclick="closeTaskSheet()"></div>
   <div class="sheet">
     <div class="sheet-handle"></div>
-    <div class="sheet-title">What's on your mind?</div>
-    <textarea class="sheet-textarea" id="dump-text" placeholder="Idea, task, thought, anything..."></textarea>
-    <div class="tent-picker">
-      <div class="tent-pick" data-tent="ops" style="color:var(--red)" onclick="pickDumpTent(this)">Ops</div>
-      <div class="tent-pick" data-tent="creative" style="color:var(--purple)" onclick="pickDumpTent(this)">Creative</div>
-      <div class="tent-pick" data-tent="people" style="color:var(--blue)" onclick="pickDumpTent(this)">People</div>
-      <div class="tent-pick" data-tent="growth" style="color:var(--green)" onclick="pickDumpTent(this)">Growth</div>
-      <div class="tent-pick" data-tent="network" style="color:var(--amber)" onclick="pickDumpTent(this)">Network</div>
-      <div class="tent-pick" data-tent="actionable" style="background:var(--red);border-color:var(--red);color:white" onclick="pickDumpTent(this)">Today ⚡</div>
+    <div class="sheet-title" id="task-sheet-title">Add Task</div>
+    <textarea class="sheet-textarea" id="task-text-input" placeholder="What needs doing?"></textarea>
+    <div class="field-label">Tentacle</div>
+    <div class="option-row" id="tent-opts">
+      <div class="opt-btn" data-val="ops" style="color:var(--red)" onclick="pickOpt(this,'tent')">Ops</div>
+      <div class="opt-btn" data-val="creative" style="color:var(--purple)" onclick="pickOpt(this,'tent')">Creative</div>
+      <div class="opt-btn" data-val="people" style="color:var(--blue)" onclick="pickOpt(this,'tent')">People</div>
+      <div class="opt-btn" data-val="growth" style="color:var(--green)" onclick="pickOpt(this,'tent')">Growth</div>
+      <div class="opt-btn" data-val="network" style="color:var(--amber)" onclick="pickOpt(this,'tent')">Network</div>
     </div>
-    <button class="sheet-submit" onclick="submitDump()">Add →</button>
+    <div class="field-label">Urgency</div>
+    <div class="option-row" id="urgency-opts">
+      <div class="opt-btn" data-val="low" onclick="pickOpt(this,'urgency')">Low</div>
+      <div class="opt-btn" data-val="medium" onclick="pickOpt(this,'urgency')">Medium</div>
+      <div class="opt-btn" data-val="high" onclick="pickOpt(this,'urgency')">High</div>
+      <div class="opt-btn" data-val="urgent" onclick="pickOpt(this,'urgency')">Urgent</div>
+    </div>
+    <div class="field-label">Timeframe</div>
+    <div class="option-row" id="timeframe-opts">
+      <div class="opt-btn" data-val="today" onclick="pickOpt(this,'timeframe')">Today</div>
+      <div class="opt-btn" data-val="week" onclick="pickOpt(this,'timeframe')">This week</div>
+      <div class="opt-btn" data-val="month" onclick="pickOpt(this,'timeframe')">This month</div>
+      <div class="opt-btn" data-val="someday" onclick="pickOpt(this,'timeframe')">Someday</div>
+    </div>
+    <button class="sheet-submit" onclick="saveTask()">Add Task →</button>
   </div>
 </div>
 
+<!-- Focus modal -->
 <div class="overlay" id="focus-overlay">
   <div class="overlay-bg" onclick="closeFocusModal()"></div>
   <div class="sheet">
@@ -363,6 +412,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
   </div>
 </div>
 
+<!-- Calendar event modal -->
 <div class="overlay" id="cal-overlay">
   <div class="overlay-bg" onclick="closeCalModal()"></div>
   <div class="sheet">
@@ -376,16 +426,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
   </div>
 </div>
 
-<div class="overlay" id="tent-add-overlay">
-  <div class="overlay-bg" onclick="closeTentAddSheet()"></div>
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-title" id="tent-add-title">Add to Ops</div>
-    <input class="sheet-input" id="tent-add-input" placeholder="What needs doing?" />
-    <button class="sheet-submit" onclick="saveTentItem()">Add →</button>
-  </div>
-</div>
-
+<!-- Fullscreen roster -->
 <div class="fullscreen" id="roster-fullscreen">
   <div class="fs-hd">
     <span class="fs-back" onclick="closeRoster()">← back</span>
@@ -398,7 +439,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--text);font-size:14px}
 <div class="toast" id="toast">✓ <span id="toast-msg">Saved</span></div>
 
 <script>
-const SK='slizz_v3',AK='slizz_api'
+const SK='slizz_v4',AK='slizz_api'
 const TENTS={
   ops:     {name:'Ops',     color:'#e8341c',bg:'#1a0a08',border:'#2a1208',desc:'Suppliers, ordering, kitchen systems'},
   creative:{name:'Creative',color:'#a070ff',bg:'#10081a',border:'#1e1030',desc:'Menu ideas, Instagram, events, brand'},
@@ -406,26 +447,85 @@ const TENTS={
   growth:  {name:'Growth',  color:'#4ecb6e',bg:'#081808',border:'#102810',desc:'Catering, expansion, revenue goals'},
   network: {name:'Network', color:'#f0a020',bg:'#18120a',border:'#2a1e0a',desc:'Collabs, outreach, brand partnerships'},
 }
+const URGENCY_ORDER={urgent:0,high:1,medium:2,low:3}
 const MOODS=[{t:0,e:'😴',c:'#555'},{t:.15,e:'😟',c:'#e8341c'},{t:.35,e:'😕',c:'#f0a020'},{t:.55,e:'😐',c:'#f0c040'},{t:.75,e:'🙂',c:'#a0d060'},{t:.95,e:'😄',c:'#4ecb6e'},{t:1,e:'🤩',c:'#4ecb6e'}]
-let undoStack=[],selectedCat='ops',selectedDumpTent='actionable',activeTent=null,calView='month',calOffset=0,calEditIdx=null,mapNodes=[]
+const QUOTES=[
+  'Do the work nobody else wants to do.',
+  'Small steps every day beat big leaps never.',
+  'The best time to start was yesterday. Now is fine.',
+  'Build the thing. Fix it later.',
+  'Discipline is just doing it when you don\'t feel like it.',
+  'One focused hour beats eight distracted ones.',
+  'Clarity comes from action, not thought.',
+  'Good enough and shipped beats perfect and waiting.',
+  'Every great business started as someone\'s side hustle.',
+  'The grind is just the gap between where you are and where you\'re going.',
+  'Stop planning. Start doing.',
+  'If it matters, put it first.',
+  'Progress, not perfection.',
+  'What you do today compounds.',
+  'Show up. Do the work. Repeat.',
+  'The hardest part is starting. So start.',
+  'Momentum is built one done task at a time.',
+  'Your future self is watching. Make them proud.',
+  'Eat the frog first.',
+  'Own the morning, own the day.',
+  'Rest is productive. Burnout isn\'t.',
+  'Done is better than perfect.',
+  'Make it simple. Then make it happen.',
+  'The difference is consistency.',
+  'You don\'t need more time. You need fewer distractions.',
+  'Ship it. Iterate. Improve.',
+  'Focus on the process. Results follow.',
+  'The goal isn\'t to be busy. It\'s to get results.',
+  'Think big. Start small. Move fast.',
+  'Success is just good habits, repeated.',
+]
+
+let undoStack=[],activeTent=null,calView='month',calOffset=0,calEditIdx=null,mapNodes=[]
+let _taskTent='ops',_taskUrgency='medium',_taskTimeframe='today'
+let _calStatus='pending'
+
 function getMood(p){return MOODS.find(m=>p<=m.t)||MOODS[MOODS.length-1]}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function showToast(msg){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 
+function setDailyQuote(){
+  const day=new Date().getDate()
+  const idx=day%QUOTES.length
+  document.getElementById('daily-quote').textContent='"'+QUOTES[idx]+'"'
+}
+
 function load(){
   try{
     const r=localStorage.getItem(SK)
-    if(r){const d=JSON.parse(r);if(!d.tasks)d.tasks=[];if(!d.items)d.items={};if(!d.events)d.events=[];if(!d.focus)d.focus='';if(!d.roster)d.roster=null;if(!d.rosterDate)d.rosterDate='';Object.keys(TENTS).forEach(k=>{if(!d.items[k])d.items[k]=[]});return d}
+    if(r){
+      const d=JSON.parse(r)
+      if(!d.tasks)d.tasks=[]
+      if(!d.events)d.events=[]
+      if(!d.focus)d.focus=''
+      if(!d.roster)d.roster=null
+      if(!d.rosterDate)d.rosterDate=''
+      return d
+    }
   }catch(e){}
-  const d={tasks:[],items:{},events:[],focus:'',roster:null,rosterDate:''};Object.keys(TENTS).forEach(k=>d.items[k]=[]);return d
+  return{tasks:[],events:[],focus:'',roster:null,rosterDate:''}
 }
 function save(d){try{localStorage.setItem(SK,JSON.stringify(d))}catch(e){}}
 function snap(){return JSON.parse(JSON.stringify(load()))}
 function pushUndo(s){undoStack.push(s);if(undoStack.length>20)undoStack.shift();document.getElementById('undo-btn').style.display='block'}
 function doUndo(){if(!undoStack.length)return;save(undoStack.pop());if(!undoStack.length)document.getElementById('undo-btn').style.display='none';renderAll();showToast('Undone ✓')}
 
+// ── Task rendering ────────────────────────────
 function renderHome(){
-  const d=load(),tasks=d.tasks||[],done=tasks.filter(t=>t.done).length,total=tasks.length
+  const d=load(),tasks=d.tasks||[]
+  const sortedTasks=[...tasks].map((t,i)=>({...t,_i:i})).sort((a,b)=>{
+    const ua=URGENCY_ORDER[a.urgency||'medium']||2,ub=URGENCY_ORDER[b.urgency||'medium']||2
+    if(ua!==ub)return ua-ub
+    const tfo={today:0,week:1,month:2,someday:3}
+    return(tfo[a.timeframe||'today']||0)-(tfo[b.timeframe||'today']||0)
+  })
+  const done=tasks.filter(t=>t.done).length,total=tasks.length
   const pct=total?done/total:0,m=getMood(pct),pi=Math.round(pct*100)
   document.getElementById('prog-num').textContent=done
   document.getElementById('prog-num').style.color=m.c
@@ -433,36 +533,114 @@ function renderHome(){
   document.getElementById('pb-fill').style.width=pi+'%'
   document.getElementById('pb-fill').style.background=m.c
   document.getElementById('pb-pct').textContent=pi+'%'
-  const allItems=Object.values(d.items||{}).flat()
-  const iDone=allItems.filter(i=>i.done).length,iTotal=allItems.length
-  document.getElementById('week-val').textContent=iDone+' / '+iTotal+' items'
-  document.getElementById('week-fill').style.width=(iTotal?Math.round(iDone/iTotal*100):0)+'%'
+  const weekTasks=tasks.filter(t=>t.timeframe==='week'||t.timeframe==='today')
+  const wDone=weekTasks.filter(t=>t.done).length
+  document.getElementById('week-val').textContent=wDone+' / '+weekTasks.length
+  document.getElementById('week-fill').style.width=(weekTasks.length?Math.round(wDone/weekTasks.length*100):0)+'%'
   document.getElementById('focus-txt').textContent=d.focus||'Tap to set your one thing'
-  document.getElementById('task-count').textContent=total+' task'+(total!==1?'s':'')
+  document.getElementById('task-count-lbl').textContent=total+' task'+(total!==1?'s':'')
+
   const list=document.getElementById('task-list')
-  if(!tasks.length){list.innerHTML='<div class="empty">No tasks yet — add one above or use the + button</div>';return}
-  list.innerHTML=tasks.map((t,i)=>{
-    const tent=t.tent?TENTS[t.tent]:null,c=tent?tent.color:'#888'
-    return`<div class="task-item"><div class="chk ${t.done?'done':''}" onclick="toggleTask(${i})"></div><div class="task-body"><div class="task-txt ${t.done?'done':''}" onclick="toggleTask(${i})">${esc(t.text)}</div>${tent?`<span class="sm-tag" style="background:${c}18;color:${c};margin-top:3px">${tent.name}</span>`:''}</div><span class="task-del" onclick="deleteTask(${i})">×</span></div>`
+  if(!tasks.length){list.innerHTML='<div class="empty">No tasks yet — tap + to add one</div>';return}
+
+  const urgencyClass={urgent:'u-urgent',high:'u-high',medium:'u-medium',low:'u-low'}
+  const timeframeClass={today:'tf-today',week:'tf-week',month:'tf-month',someday:'tf-someday'}
+
+  list.innerHTML=sortedTasks.map(t=>{
+    const tent=t.tent?TENTS[t.tent]:null,tc=tent?tent.color:'#888'
+    const uc=urgencyClass[t.urgency||'medium'],tfc=timeframeClass[t.timeframe||'today']
+    const isUrgent=(t.urgency==='urgent'&&!t.done)
+    return`<div class="task-item ${isUrgent?'urgent-high':''}">
+      <div class="chk ${t.done?'done':''}" onclick="toggleTask(${t._i})"></div>
+      <div class="task-body">
+        <div class="task-txt ${t.done?'done':''}" onclick="toggleTask(${t._i})">${esc(t.text)}</div>
+        <div class="task-meta">
+          ${tent?`<span class="sm-tag" style="background:${tc}18;color:${tc}">${tent.name}</span>`:''}
+          <span class="sm-tag ${uc}">${t.urgency||'medium'}</span>
+          <span class="sm-tag ${tfc}">${t.timeframe||'today'}</span>
+        </div>
+      </div>
+      <span class="task-del" onclick="deleteTask(${t._i})">×</span>
+    </div>`
   }).join('')
 }
 
 function toggleTask(i){const s=snap();const d=load();pushUndo(s);d.tasks[i].done=!d.tasks[i].done;save(d);renderHome();if(document.getElementById('v-map').classList.contains('active'))drawMap()}
-function deleteTask(i){const s=snap();const d=load();pushUndo(s);d.tasks.splice(i,1);save(d);renderHome()}
-function quickAdd(){const inp=document.getElementById('qa-input'),v=inp.value.trim();if(!v)return;const s=snap();const d=load();pushUndo(s);d.tasks.push({text:v,done:false,tent:selectedCat});save(d);inp.value='';renderHome()}
-function selectCat(el){
-  document.querySelectorAll('.cat-chip').forEach(c=>{c.classList.remove('sel');c.style.background='transparent';c.style.borderColor='';c.style.color=TENTS[c.dataset.cat]?.color||'#6a6860'})
-  el.classList.add('sel');const t=TENTS[el.dataset.cat]
-  if(t){el.style.background=t.color;el.style.borderColor=t.color;el.style.color='white'}
-  selectedCat=el.dataset.cat
+function deleteTask(i){const s=snap();const d=load();pushUndo(s);d.tasks.splice(i,1);save(d);renderAll()}
+
+// ── Universal task sheet ──────────────────────
+function openTaskSheet(prefillTent){
+  _taskTent=prefillTent||activeTent||'ops'
+  _taskUrgency='medium'
+  _taskTimeframe='today'
+  document.getElementById('task-text-input').value=''
+  document.getElementById('task-sheet-title').textContent=activeTent?'Add to '+TENTS[activeTent]?.name:'Add Task'
+  resetOptBtns()
+  // Pre-select tent
+  const tentBtn=document.querySelector(`#tent-opts .opt-btn[data-val="${_taskTent}"]`)
+  if(tentBtn)selectOptBtn(tentBtn,TENTS[_taskTent]?.color||'#e8341c')
+  // Pre-select medium urgency
+  const urgBtn=document.querySelector(`#urgency-opts .opt-btn[data-val="medium"]`)
+  if(urgBtn)selectOptBtn(urgBtn,'#4a9eff')
+  // Pre-select today
+  const tfBtn=document.querySelector(`#timeframe-opts .opt-btn[data-val="today"]`)
+  if(tfBtn)selectOptBtn(tfBtn,'#e8341c')
+  document.getElementById('task-overlay').classList.add('show')
+  setTimeout(()=>document.getElementById('task-text-input').focus(),100)
+}
+function closeTaskSheet(){document.getElementById('task-overlay').classList.remove('show')}
+
+function resetOptBtns(){
+  document.querySelectorAll('#tent-opts .opt-btn').forEach(b=>{b.classList.remove('sel');b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color=TENTS[b.dataset.val]?.color||'var(--muted)'})
+  document.querySelectorAll('#urgency-opts .opt-btn').forEach(b=>{b.classList.remove('sel');b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color='var(--muted)'})
+  document.querySelectorAll('#timeframe-opts .opt-btn').forEach(b=>{b.classList.remove('sel');b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color='var(--muted)'})
 }
 
+function selectOptBtn(el,color){
+  el.classList.add('sel');el.style.background=color;el.style.borderColor=color;el.style.color='white'
+}
+
+const URGENCY_COLORS={urgent:'#e8341c',high:'#f0a020',medium:'#4a9eff',low:'#6a6860'}
+const TF_COLORS={today:'#e8341c',week:'#f0a020',month:'#4a9eff',someday:'#6a6860'}
+
+function pickOpt(el,group){
+  if(group==='tent'){
+    document.querySelectorAll('#tent-opts .opt-btn').forEach(b=>{b.classList.remove('sel');b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color=TENTS[b.dataset.val]?.color||'var(--muted)'})
+    _taskTent=el.dataset.val;selectOptBtn(el,TENTS[_taskTent]?.color||'#e8341c')
+  } else if(group==='urgency'){
+    document.querySelectorAll('#urgency-opts .opt-btn').forEach(b=>{b.classList.remove('sel');b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color='var(--muted)'})
+    _taskUrgency=el.dataset.val;selectOptBtn(el,URGENCY_COLORS[_taskUrgency]||'#4a9eff')
+  } else if(group==='timeframe'){
+    document.querySelectorAll('#timeframe-opts .opt-btn').forEach(b=>{b.classList.remove('sel');b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color='var(--muted)'})
+    _taskTimeframe=el.dataset.val;selectOptBtn(el,TF_COLORS[_taskTimeframe]||'#e8341c')
+  }
+}
+
+function saveTask(){
+  const v=document.getElementById('task-text-input').value.trim();if(!v){showToast('Add some text first');return}
+  const s=snap();const d=load();pushUndo(s)
+  d.tasks.push({text:v,done:false,tent:_taskTent,urgency:_taskUrgency,timeframe:_taskTimeframe,created:Date.now()})
+  save(d);document.getElementById('task-text-input').value=''
+  closeTaskSheet();renderAll();showToast('Task added ✓')
+}
+
+// ── Tentacles ─────────────────────────────────
 function renderTentGrid(){
-  const d=load(),grid=document.getElementById('tent-grid')
+  const d=load(),tasks=d.tasks||[],grid=document.getElementById('tent-grid')
   grid.innerHTML=Object.entries(TENTS).map(([id,t])=>{
-    const items=d.items[id]||[],done=items.filter(i=>i.done).length,pct=items.length?Math.round(done/items.length*100):0
-    const preview=items.slice(0,2).map(i=>i.text).join(' · ')||t.desc
-    return`<div class="tent-card" style="background:${t.bg};border-color:${t.border}" onclick="openTent('${id}')"><div class="tent-hd"><div class="tent-name" style="color:${t.color}">${t.name}</div><div class="tent-meta" style="color:${t.color}">${items.length} items · ${done} done</div></div><div class="tent-pb-wrap"><div class="tent-pb" style="width:${pct}%;background:${t.color}"></div></div><div class="tent-preview" style="color:${t.color}cc">${esc(preview.slice(0,80))}${preview.length>80?'…':''}</div><span class="tent-add-lbl" style="color:${t.color}88;border-color:${t.color}30">+ add item</span></div>`
+    const items=tasks.filter(task=>task.tent===id)
+    const done=items.filter(i=>i.done).length,pct=items.length?Math.round(done/items.length*100):0
+    const urgentCount=items.filter(i=>!i.done&&i.urgency==='urgent').length
+    const preview=items.filter(i=>!i.done).slice(0,2).map(i=>i.text).join(' · ')||t.desc
+    return`<div class="tent-card" style="background:${t.bg};border-color:${t.border}" onclick="openTent('${id}')">
+      <div class="tent-hd">
+        <div class="tent-name" style="color:${t.color}">${t.name}${urgentCount?` <span style="font-size:9px;background:${t.color}30;padding:1px 6px;border-radius:4px">${urgentCount} urgent</span>`:''}</div>
+        <div class="tent-meta" style="color:${t.color}">${items.length} tasks · ${done} done</div>
+      </div>
+      <div class="tent-pb-wrap"><div class="tent-pb" style="width:${pct}%;background:${t.color}"></div></div>
+      <div class="tent-preview" style="color:${t.color}cc">${esc(preview.slice(0,80))}${preview.length>80?'…':''}</div>
+      <span class="tent-add-lbl" style="color:${t.color}88;border-color:${t.color}30">+ add task</span>
+    </div>`
   }).join('')
 }
 
@@ -475,15 +653,19 @@ function openTent(id){
   document.getElementById('tent-back-btn').style.color=t.color
   document.getElementById('tent-add-btn').style.color=t.color
   document.getElementById('tent-add-btn').style.borderColor=t.color+'44'
-  document.getElementById('tent-add-title').textContent='Add to '+t.name
   renderTentDetail()
 }
 
 function closeTentDetail(){activeTent=null;document.getElementById('tent-grid').style.display='flex';document.getElementById('tent-detail').style.display='none';renderTentGrid()}
 
 function renderTentDetail(){
-  if(!activeTent)return;const d=load(),t=TENTS[activeTent],items=d.items[activeTent]||[]
+  if(!activeTent)return
+  const d=load(),t=TENTS[activeTent],tasks=d.tasks||[]
+  const items=tasks.map((task,i)=>({...task,_i:i})).filter(task=>task.tent===activeTent)
+    .sort((a,b)=>(URGENCY_ORDER[a.urgency||'medium']||2)-(URGENCY_ORDER[b.urgency||'medium']||2))
   const done=items.filter(i=>i.done).length,pct=items.length?Math.round(done/items.length*100):0
+  const urgencyClass={urgent:'u-urgent',high:'u-high',medium:'u-medium',low:'u-low'}
+  const timeframeClass={today:'tf-today',week:'tf-week',month:'tf-month',someday:'tf-someday'}
   document.getElementById('tent-detail-body').innerHTML=`
     <div class="detail-stats">
       <div class="stat-row">
@@ -493,63 +675,112 @@ function renderTentDetail(){
       </div>
       <div class="tent-pb-wrap" style="height:8px;background:#222"><div class="tent-pb" style="width:${pct}%;background:${t.color}"></div></div>
     </div>
-    ${items.map((item,i)=>`<div class="detail-item"><div class="di-chk ${item.done?'done':''}" onclick="toggleTentItem(${i})"></div><div class="di-dot" style="background:${t.color}"></div><span class="di-txt ${item.done?'di-done':''}">${esc(item.text)}</span><span class="di-add" style="background:${t.color}18;color:${t.color};border:1px solid ${t.color}30" onclick="addTentToTasks(${i})">+ tasks</span><span class="di-del" onclick="deleteTentItem(${i})">×</span></div>`).join('')}
+    ${items.map(item=>`<div class="detail-item">
+      <div class="di-chk ${item.done?'done':''}" onclick="toggleTask(${item._i})"></div>
+      <div class="di-dot" style="background:${t.color}"></div>
+      <div class="di-body">
+        <div class="di-txt ${item.done?'di-done':''}">${esc(item.text)}</div>
+        <div class="di-meta">
+          <span class="sm-tag ${urgencyClass[item.urgency||'medium']}">${item.urgency||'medium'}</span>
+          <span class="sm-tag ${timeframeClass[item.timeframe||'today']}">${item.timeframe||'today'}</span>
+        </div>
+      </div>
+      <span class="di-del" onclick="deleteTask(${item._i})">×</span>
+    </div>`).join('')}
     ${!items.length?'<div class="empty">Nothing here yet — tap + add above</div>':''}
-    <div class="detail-add-row"><input class="detail-add-input" id="tent-inline-input" placeholder="Quick add..." onkeydown="if(event.key==='Enter')saveTentInline()" /><button class="detail-add-btn" onclick="saveTentInline()">+</button></div>`
+  `
 }
 
-function toggleTentItem(i){const s=snap();const d=load();pushUndo(s);d.items[activeTent][i].done=!d.items[activeTent][i].done;save(d);renderTentDetail();renderHome();if(document.getElementById('v-map').classList.contains('active'))drawMap()}
-function deleteTentItem(i){const s=snap();const d=load();pushUndo(s);d.items[activeTent].splice(i,1);save(d);renderTentDetail()}
-function addTentToTasks(i){const s=snap();const d=load();pushUndo(s);const item=d.items[activeTent][i];d.tasks.push({text:item.text,done:false,tent:activeTent});save(d);renderHome();showToast('Added to tasks ✓')}
-function saveTentInline(){const inp=document.getElementById('tent-inline-input'),v=inp.value.trim();if(!v)return;const s=snap();const d=load();pushUndo(s);d.items[activeTent].push({text:v,done:false});save(d);inp.value='';renderTentDetail()}
-function openTentAddSheet(){document.getElementById('tent-add-overlay').classList.add('show');setTimeout(()=>document.getElementById('tent-add-input').focus(),100)}
-function closeTentAddSheet(){document.getElementById('tent-add-overlay').classList.remove('show')}
-function saveTentItem(){const v=document.getElementById('tent-add-input').value.trim();if(!v)return;const s=snap();const d=load();pushUndo(s);d.items[activeTent].push({text:v,done:false});save(d);document.getElementById('tent-add-input').value='';closeTentAddSheet();renderTentDetail();showToast('Added ✓')}
-
+// ── Calendar ──────────────────────────────────
 function setCalView(v,el){calView=v;document.querySelectorAll('.cal-tab').forEach(t=>t.classList.remove('act'));el.classList.add('act');renderCalendar()}
 function renderCalendar(){renderCalGrid();renderCalEvents()}
+
 function renderCalGrid(){
   const wrap=document.getElementById('cal-grid-wrap'),now=new Date()
-  const y=now.getFullYear(),m=now.getMonth()+calOffset,date=new Date(y,m,1)
-  const monthName=date.toLocaleString('en',{month:'long',year:'numeric'})
-  const firstDay=(date.getDay()+6)%7,daysInMonth=new Date(y,m+1,0).getDate()
-  const todayDate=now.getDate(),todayMonth=now.getMonth(),todayYear=now.getFullYear()
-  const d=load()
-  const eventDays=new Set((d.events||[]).filter(e=>{const ed=new Date(e.date+'T00:00:00');return ed.getMonth()===date.getMonth()&&ed.getFullYear()===date.getFullYear()}).map(e=>new Date(e.date+'T00:00:00').getDate()))
-  if(calView==='list'){wrap.innerHTML='';return}
-  let cells=''
-  for(let i=0;i<firstDay;i++)cells+='<div class="cal-cell"></div>'
-  for(let dd=1;dd<=daysInMonth;dd++){
-    const isToday=dd===todayDate&&date.getMonth()===todayMonth&&date.getFullYear()===todayYear
-    const hasEv=eventDays.has(dd)
-    cells+=`<div class="cal-cell" onclick="calDayTap(${dd},${date.getMonth()},${date.getFullYear()})"><div class="cal-cnum ${isToday?'today-num':hasEv?'has-event':''}">${dd}</div>${hasEv?'<div class="cal-cdot" style="background:var(--purple)"></div>':''}</div>`
+  const baseYear=now.getFullYear(),baseMonth=now.getMonth()
+  const viewDate=new Date(baseYear,baseMonth+calOffset,1)
+
+  if(calView==='month'){
+    const monthName=viewDate.toLocaleString('en',{month:'long',year:'numeric'})
+    const firstDay=(viewDate.getDay()+6)%7,daysInMonth=new Date(baseYear,baseMonth+calOffset+1,0).getDate()
+    const todayDate=now.getDate(),todayMonth=now.getMonth(),todayYear=now.getFullYear()
+    const d=load()
+    const eventDays=new Set((d.events||[]).filter(e=>{const ed=new Date(e.date+'T00:00:00');return ed.getMonth()===viewDate.getMonth()&&ed.getFullYear()===viewDate.getFullYear()}).map(e=>new Date(e.date+'T00:00:00').getDate()))
+    const taskDays=new Set((d.tasks||[]).filter(t=>t.timeframe==='today'||t.timeframe==='week').map(()=>todayDate))
+    let cells=''
+    for(let i=0;i<firstDay;i++)cells+='<div class="cal-cell"></div>'
+    for(let dd=1;dd<=daysInMonth;dd++){
+      const isToday=dd===todayDate&&viewDate.getMonth()===todayMonth&&viewDate.getFullYear()===todayYear
+      const hasEv=eventDays.has(dd)
+      cells+=`<div class="cal-cell" onclick="calDayTap(${dd},${viewDate.getMonth()},${viewDate.getFullYear()})"><div class="cal-cnum ${isToday?'today-num':hasEv?'has-event':''}">${dd}</div>${hasEv?'<div class="cal-cdot" style="background:var(--purple)"></div>':''}</div>`
+    }
+    wrap.innerHTML=`<div class="cal-month-hd"><button class="cal-nav" onclick="calNav(-1)">‹</button><div class="cal-month-title">${monthName}</div><button class="cal-nav" onclick="calNav(1)">›</button></div><div class="cal-days-hd"><div class="cal-dlbl">M</div><div class="cal-dlbl">T</div><div class="cal-dlbl">W</div><div class="cal-dlbl">T</div><div class="cal-dlbl">F</div><div class="cal-dlbl">S</div><div class="cal-dlbl">S</div></div><div class="cal-cells">${cells}</div>`
+  } else if(calView==='week'){
+    // Get start of current/offset week (Monday)
+    const weekStart=new Date(now)
+    weekStart.setDate(now.getDate()-(now.getDay()||7)+1+(calOffset*7))
+    weekStart.setHours(0,0,0,0)
+    const days=Array.from({length:7},(_,i)=>{const d=new Date(weekStart);d.setDate(weekStart.getDate()+i);return d})
+    const d=load()
+    const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+    const weekLabel=`${weekStart.toLocaleDateString('en',{day:'numeric',month:'short'})} – ${days[6].toLocaleDateString('en',{day:'numeric',month:'short'})}`
+
+    const cols=days.map((day,di)=>{
+      const isToday=day.toDateString()===now.toDateString()
+      const dayStr=day.toISOString().slice(0,10)
+      const dayEvents=(d.events||[]).filter(e=>e.date===dayStr)
+      const urgentToday=isToday?(d.tasks||[]).filter(t=>!t.done&&(t.timeframe==='today'||t.urgency==='urgent')):[]
+      const eventDots=dayEvents.map(e=>`<div class="week-event-dot" style="background:rgba(160,112,255,0.15);color:var(--purple)" onclick="openCalModalEdit(${(d.events||[]).indexOf(e)})">${esc(e.name.slice(0,8))}</div>`).join('')
+      const taskDots=urgentToday.slice(0,2).map(t=>`<div class="week-event-dot" style="background:rgba(232,52,28,0.12);color:var(--red)">${esc(t.text.slice(0,8))}</div>`).join('')
+      return`<div class="week-day-col"><div class="week-day-hd"><div class="week-day-name">${dayNames[di]}</div><div class="week-day-num ${isToday?'today-num':''}">${day.getDate()}</div></div>${eventDots}${taskDots}</div>`
+    }).join('')
+
+    wrap.innerHTML=`<div class="cal-month-hd"><button class="cal-nav" onclick="calNav(-1)">‹</button><div class="cal-month-title" style="font-size:13px">${weekLabel}</div><button class="cal-nav" onclick="calNav(1)">›</button></div><div class="cal-days-hd"><div class="cal-dlbl">M</div><div class="cal-dlbl">T</div><div class="cal-dlbl">W</div><div class="cal-dlbl">T</div><div class="cal-dlbl">F</div><div class="cal-dlbl">S</div><div class="cal-dlbl">S</div></div><div class="week-grid">${cols}</div>`
+  } else {
+    wrap.innerHTML=`<div class="cal-month-hd"><button class="cal-nav" onclick="calNav(-1)">‹</button><div class="cal-month-title">All events</div><button class="cal-nav" onclick="calNav(1)">›</button></div>`
   }
-  wrap.innerHTML=`<div class="cal-month-hd"><button class="cal-nav" onclick="calMonth(-1)">‹</button><div class="cal-month-title">${monthName}</div><button class="cal-nav" onclick="calMonth(1)">›</button></div><div class="cal-days-hd"><div class="cal-dlbl">M</div><div class="cal-dlbl">T</div><div class="cal-dlbl">W</div><div class="cal-dlbl">T</div><div class="cal-dlbl">F</div><div class="cal-dlbl">S</div><div class="cal-dlbl">S</div></div><div class="cal-cells">${cells}</div>`
 }
-function calMonth(dir){calOffset+=dir;renderCalendar()}
+
+function calNav(dir){calOffset+=dir;renderCalendar()}
 function calDayTap(d,m,y){openCalModalForDate(`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`)}
 
 function renderCalEvents(){
   const d=load(),events=(d.events||[]).sort((a,b)=>a.date.localeCompare(b.date)),list=document.getElementById('cal-event-list')
-  if(!events.length){list.innerHTML='<div class="empty">No events yet — tap + event or a date</div>';return}
+  if(!events.length){list.innerHTML='<div class="empty">No events yet — tap + event or tap a date</div>';return}
   const sc={confirmed:'#4ecb6e',pending:'#f0a020',urgent:'#e8341c'}
   list.innerHTML=events.map((e,i)=>{
     const dt=new Date(e.date+'T00:00:00'),c=sc[e.status||'pending']||'#f0a020'
-    return`<div class="cal-event-item" onclick="openCalModalEdit(${i})"><div class="cal-edate"><div class="cal-eday">${dt.getDate()}</div><div class="cal-emon">${dt.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div><div style="flex:1"><div class="cal-ename">${esc(e.name)}</div>${e.detail?`<div class="cal-edetail">${esc(e.detail)}</div>`:''} ${e.urgent?`<div class="cal-eurgent">⚠ ${esc(e.urgent)}</div>`:''} ${e.notes?`<div class="cal-edetail" style="font-style:italic">${esc(e.notes.slice(0,60))}${e.notes.length>60?'…':''}</div>`:''}<span class="cal-estatus" style="background:${c}18;color:${c}">${e.status||'pending'}</span><span class="sm-tag" style="background:rgba(232,52,28,0.08);color:var(--red);margin-left:4px;cursor:pointer" onclick="event.stopPropagation();addEventToTasks(${i})">+ tasks</span></div><span style="color:var(--muted);font-size:18px;padding:0 4px">›</span></div>`
+    return`<div class="cal-event-item" onclick="openCalModalEdit(${i})">
+      <div class="cal-edate"><div class="cal-eday">${dt.getDate()}</div><div class="cal-emon">${dt.toLocaleString('en',{month:'short'}).toUpperCase()}</div></div>
+      <div style="flex:1">
+        <div class="cal-ename">${esc(e.name)}</div>
+        ${e.detail?`<div class="cal-edetail">${esc(e.detail)}</div>`:''}
+        ${e.urgent?`<div class="cal-eurgent">⚠ ${esc(e.urgent)}</div>`:''}
+        ${e.notes?`<div class="cal-edetail" style="font-style:italic">${esc(e.notes.slice(0,60))}${e.notes.length>60?'…':''}</div>`:''}
+        <span class="cal-estatus" style="background:${c}18;color:${c}">${e.status||'pending'}</span>
+        <span class="sm-tag" style="background:rgba(232,52,28,0.08);color:var(--red);margin-left:4px;cursor:pointer" onclick="event.stopPropagation();addEventToTasks(${i})">+ tasks</span>
+      </div>
+      <span style="color:var(--muted);font-size:18px;padding:0 4px">›</span>
+    </div>`
   }).join('')
 }
 
 function openCalModal(){openCalModalForDate(new Date().toISOString().slice(0,10))}
-function openCalModalForDate(dateStr){calEditIdx=null;document.getElementById('cal-modal-title').textContent='Add Event';document.getElementById('cal-modal-body').innerHTML=calModalHTML({date:dateStr,name:'',detail:'',urgent:'',notes:'',status:'pending'});_calStatus='pending';document.getElementById('cal-overlay').classList.add('show');setTimeout(()=>document.getElementById('cm-name')?.focus(),100)}
+function openCalModalForDate(dateStr){calEditIdx=null;_calStatus='pending';document.getElementById('cal-modal-title').textContent='Add Event';document.getElementById('cal-modal-body').innerHTML=calModalHTML({date:dateStr,name:'',detail:'',urgent:'',notes:'',status:'pending'});document.getElementById('cal-overlay').classList.add('show');setTimeout(()=>document.getElementById('cm-name')?.focus(),100)}
 function openCalModalEdit(i){calEditIdx=i;const d=load(),e=d.events[i];_calStatus=e.status||'pending';document.getElementById('cal-modal-title').textContent='Edit Event';document.getElementById('cal-modal-body').innerHTML=calModalHTML(e)+`<button onclick="deleteCalEvent(${i});closeCalModal()" style="width:100%;margin-top:8px;padding:9px;background:transparent;border:1px solid rgba(232,52,28,0.2);border-radius:10px;color:var(--red);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Delete event</button>`;document.getElementById('cal-overlay').classList.add('show')}
 function calModalHTML(e){
   const sc={pending:'rgba(240,160,32,0.4)',confirmed:'rgba(78,203,110,0.4)',urgent:'rgba(232,52,28,0.4)'}
   const bg={pending:'rgba(240,160,32,0.1)',confirmed:'rgba(78,203,110,0.1)',urgent:'rgba(232,52,28,0.1)'}
   const tc={pending:'#f0a020',confirmed:'#4ecb6e',urgent:'#e8341c'}
   const cs=e.status||'pending'
-  return`<input class="modal-input" id="cm-name" placeholder="Event name" value="${esc(e.name||'')}" /><input class="modal-input" type="date" id="cm-date" value="${e.date||''}" /><input class="modal-input" id="cm-detail" placeholder="Details e.g. 80 people · venue" value="${esc(e.detail||'')}" /><input class="modal-input" id="cm-urgent" placeholder="Urgent note (optional)" value="${esc(e.urgent||'')}" /><textarea class="sheet-textarea" id="cm-notes" placeholder="Notes...">${esc(e.notes||'')}</textarea><div style="margin-bottom:10px"><div class="slabel" style="margin-bottom:6px">Status</div><div style="display:flex;gap:6px">${['pending','confirmed','urgent'].map(s=>`<div onclick="calSetStatus('${s}',this)" data-status="${s}" style="flex:1;padding:7px;border-radius:8px;text-align:center;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;border:1px solid ${cs===s?sc[s]:'var(--b1)'};background:${cs===s?bg[s]:'transparent'};color:${tc[s]}">${s}</div>`).join('')}</div></div>`
+  return`<input class="modal-input" id="cm-name" placeholder="Event name" value="${esc(e.name||'')}" />
+    <input class="modal-input" type="date" id="cm-date" value="${e.date||''}" />
+    <input class="modal-input" id="cm-detail" placeholder="Details e.g. 80 people · venue" value="${esc(e.detail||'')}" />
+    <input class="modal-input" id="cm-urgent" placeholder="Urgent note (optional)" value="${esc(e.urgent||'')}" />
+    <textarea class="sheet-textarea" id="cm-notes" placeholder="Notes...">${esc(e.notes||'')}</textarea>
+    <div style="margin-bottom:10px"><div class="slabel" style="margin-bottom:6px">Status</div>
+    <div style="display:flex;gap:6px">${['pending','confirmed','urgent'].map(s=>`<div onclick="calSetStatus('${s}',this)" data-status="${s}" style="flex:1;padding:7px;border-radius:8px;text-align:center;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.05em;border:1px solid ${cs===s?sc[s]:'var(--b1)'};background:${cs===s?bg[s]:'transparent'};color:${tc[s]}">${s}</div>`).join('')}</div></div>`
 }
-let _calStatus='pending'
 function calSetStatus(s,el){_calStatus=s;const sc={pending:'rgba(240,160,32,0.4)',confirmed:'rgba(78,203,110,0.4)',urgent:'rgba(232,52,28,0.4)'};const bg={pending:'rgba(240,160,32,0.1)',confirmed:'rgba(78,203,110,0.1)',urgent:'rgba(232,52,28,0.1)'};const tc={pending:'#f0a020',confirmed:'#4ecb6e',urgent:'#e8341c'};document.querySelectorAll('[data-status]').forEach(b=>{const bs=b.dataset.status;b.style.border='1px solid '+(bs===s?sc[bs]:'var(--b1)');b.style.background=bs===s?bg[bs]:'transparent';b.style.color=tc[bs]})}
 function saveCalModal(){
   const name=document.getElementById('cm-name')?.value.trim(),date=document.getElementById('cm-date')?.value
@@ -560,37 +791,22 @@ function saveCalModal(){
   save(d);closeCalModal();renderCalendar();showToast('Saved ✓')
 }
 function deleteCalEvent(i){const s=snap();const d=load();pushUndo(s);d.events.splice(i,1);save(d);renderCalendar()}
-function addEventToTasks(i){const s=snap();const d=load();pushUndo(s);d.tasks.push({text:d.events[i].name,done:false,tent:null});save(d);renderHome();showToast('Added to tasks ✓')}
+function addEventToTasks(i){const s=snap();const d=load();pushUndo(s);const e=d.events[i];d.tasks.push({text:e.name,done:false,tent:'growth',urgency:'medium',timeframe:'today',created:Date.now()});save(d);renderHome();showToast('Added to tasks ✓')}
 function closeCalModal(){document.getElementById('cal-overlay').classList.remove('show')}
 
+// ── Roster ────────────────────────────────────
 function handleRoster(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const d=load();d.roster=ev.target.result;d.rosterDate=new Date().toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'});save(d);showRosterUI(d)};reader.readAsDataURL(file)}
 function showRosterUI(d){document.getElementById('roster-empty').style.display='none';document.getElementById('roster-photo').style.display='block';document.getElementById('roster-img').src=d.roster;document.getElementById('roster-lbl').textContent=d.rosterDate||'Roster';document.getElementById('fs-roster-img').src=d.roster;document.getElementById('fs-roster-lbl').textContent=d.rosterDate||''}
 function openRoster(){document.getElementById('roster-fullscreen').classList.add('show')}
 function closeRoster(){document.getElementById('roster-fullscreen').classList.remove('show')}
 function initRoster(){const d=load();if(d.roster)showRosterUI(d)}
 
-function openDump(){document.getElementById('dump-overlay').classList.add('show');setTimeout(()=>document.getElementById('dump-text').focus(),100)}
-function closeDump(){document.getElementById('dump-overlay').classList.remove('show')}
-function pickDumpTent(el){
-  selectedDumpTent=el.dataset.tent
-  document.querySelectorAll('.tent-pick').forEach(b=>{b.style.background='var(--s2)';b.style.borderColor='var(--b1)';b.style.color=TENTS[b.dataset.tent]?.color||'#f2f0e8';b.style.borderWidth='1px'})
-  const t=TENTS[el.dataset.tent]
-  if(t){el.style.background=t.color;el.style.borderColor=t.color;el.style.color='white'}
-  else{el.style.background='var(--red)';el.style.borderColor='var(--red)';el.style.color='white'}
-}
-function submitDump(){
-  const v=document.getElementById('dump-text').value.trim();if(!v)return
-  const s=snap();const d=load();pushUndo(s)
-  if(selectedDumpTent==='actionable')d.tasks.push({text:v,done:false,tent:null})
-  else d.items[selectedDumpTent].push({text:v,done:false})
-  save(d);document.getElementById('dump-text').value='';closeDump();renderAll()
-  showToast('Added to '+(TENTS[selectedDumpTent]?.name||'tasks')+' ✓')
-}
-
+// ── Focus modal ───────────────────────────────
 function openFocusModal(){const d=load();document.getElementById('focus-input').value=d.focus||'';document.getElementById('focus-overlay').classList.add('show');setTimeout(()=>document.getElementById('focus-input').focus(),100)}
 function closeFocusModal(){document.getElementById('focus-overlay').classList.remove('show')}
 function saveFocus(){const v=document.getElementById('focus-input').value.trim();const d=load();d.focus=v;save(d);document.getElementById('focus-txt').textContent=v||'Tap to set your one thing';closeFocusModal();showToast('Focus saved ✓')}
 
+// ── Map ───────────────────────────────────────
 function drawMap(){
   const canvas=document.getElementById('map-canvas'),wrap=document.getElementById('v-map').querySelector('.map-wrap')
   const rect=wrap.getBoundingClientRect()
@@ -601,15 +817,18 @@ function drawMap(){
   for(let x=0;x<W;x+=26)for(let y=0;y<H;y+=26){ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill()}
   const angles=[-90,-18,54,162,234];mapNodes=[]
   Object.entries(TENTS).forEach(([id,t],idx)=>{
-    const items=d.items[id]||[],done=items.filter(i=>i.done).length
+    const tasks=(d.tasks||[]).filter(task=>task.tent===id)
+    const done=tasks.filter(i=>i.done).length
     const a=angles[idx]*Math.PI/180,bx=cx+Math.cos(a)*r,by=cy+Math.sin(a)*r
     mapNodes.push({bx,by,id})
     ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(bx,by);ctx.strokeStyle=t.color+'40';ctx.lineWidth=1.5;ctx.setLineDash([3,5]);ctx.stroke();ctx.setLineDash([])
     ctx.beginPath();ctx.arc(bx,by,36,0,Math.PI*2);ctx.fillStyle=t.color+'15';ctx.fill();ctx.strokeStyle=t.color+'60';ctx.lineWidth=1.5;ctx.stroke()
-    if(items.length>0){const pct=done/items.length;ctx.beginPath();ctx.arc(bx,by,36,-Math.PI/2,-Math.PI/2+Math.PI*2*pct);ctx.strokeStyle=t.color;ctx.lineWidth=3;ctx.stroke()}
-    if(items.length>0){ctx.beginPath();ctx.arc(bx+26,by-26,12,0,Math.PI*2);ctx.fillStyle=t.color;ctx.fill();ctx.fillStyle='#0a0a08';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(items.length,bx+26,by-26)}
+    if(tasks.length>0){const pct=done/tasks.length;ctx.beginPath();ctx.arc(bx,by,36,-Math.PI/2,-Math.PI/2+Math.PI*2*pct);ctx.strokeStyle=t.color;ctx.lineWidth=3;ctx.stroke()}
+    if(tasks.length>0){ctx.beginPath();ctx.arc(bx+26,by-26,12,0,Math.PI*2);ctx.fillStyle=t.color;ctx.fill();ctx.fillStyle='#0a0a08';ctx.font='bold 9px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tasks.length,bx+26,by-26)}
     ctx.fillStyle=t.color;ctx.font='500 12px DM Sans,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t.name,bx,by-5)
-    const pl=items.length?Math.round(done/items.length*100)+'% done':'empty';ctx.fillStyle='rgba(242,240,232,0.3)';ctx.font='10px DM Sans,sans-serif';ctx.fillText(pl,bx,by+9)
+    const pl=tasks.length?Math.round(done/tasks.length*100)+'% done':'empty';ctx.fillStyle='rgba(242,240,232,0.3)';ctx.font='10px DM Sans,sans-serif';ctx.fillText(pl,bx,by+9)
+    const urgentCount=tasks.filter(i=>!i.done&&i.urgency==='urgent').length
+    if(urgentCount>0){ctx.beginPath();ctx.arc(bx-26,by-26,11,0,Math.PI*2);ctx.fillStyle='#e8341c';ctx.fill();ctx.fillStyle='white';ctx.font='bold 8px sans-serif';ctx.fillText('!'+urgentCount,bx-26,by-26)}
   })
   ctx.beginPath();ctx.arc(cx,cy,50,0,Math.PI*2);ctx.fillStyle='#1a0808';ctx.fill();ctx.strokeStyle='#e8341c';ctx.lineWidth=2;ctx.stroke()
   const tasks=d.tasks||[],tdone=tasks.filter(t=>t.done).length,total=tasks.length
@@ -624,6 +843,7 @@ function handleMapTap(e){
   for(const {bx,by,id} of mapNodes){if(Math.sqrt((x-bx)**2+(y-by)**2)<44){switchTab('tentacles',document.getElementById('tab-tentacles'));setTimeout(()=>openTent(id),60);return}}
 }
 
+// ── Navigation ────────────────────────────────
 function switchTab(name,el){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'))
   document.getElementById('v-'+name).classList.add('active')
@@ -636,24 +856,28 @@ function switchTab(name,el){
   else if(name==='map')setTimeout(drawMap,60)
 }
 
+// ── API ───────────────────────────────────────
 function toggleApiBanner(){document.getElementById('api-banner').classList.toggle('show')}
 function saveApiKey(){const v=document.getElementById('api-key-input').value.trim();if(!v.startsWith('sk-ant')){showToast('Key should start with sk-ant');return}localStorage.setItem(AK,v);document.getElementById('api-key-input').value='';document.getElementById('api-banner').classList.remove('show');const btn=document.getElementById('api-btn');btn.textContent='API ✓';btn.classList.add('green');showToast('API key saved ✓')}
 
 function askClaude(){
   const d=load(),tasks=d.tasks||[],done=tasks.filter(t=>t.done).length
-  const ts=Object.entries(TENTS).map(([id,t])=>{const items=d.items[id]||[],td=items.filter(i=>i.done).length;return`${t.name}: ${items.length} items, ${td} done`}).join(' | ')
-  const msg=`I'm Scott, owner of Thin Slizzy — rock n roll pizzeria at 115 Johnston St Collingwood, next to The Tote. Solo operator, ~$18k/week revenue, casual staff weekends.\n\nTonight's focus: ${d.focus||'not set'}\nActionable tasks: ${done}/${tasks.length} done\n${tasks.filter(t=>!t.done).length?'Remaining: '+tasks.filter(t=>!t.done).map(t=>t.text).join(', '):'All done!'}\nTentacles: ${ts}\nUpcoming: ${(d.events||[]).slice(0,3).map(e=>e.name).join(', ')||'none'}\n\nWhat should I focus on right now? What am I missing?`
+  const ts=Object.entries(TENTS).map(([id,t])=>{const items=tasks.filter(task=>task.tent===id);const td=items.filter(i=>i.done).length;const urgent=items.filter(i=>!i.done&&i.urgency==='urgent').length;return`${t.name}: ${items.length} tasks, ${td} done${urgent?', '+urgent+' urgent':''}`}).join(' | ')
+  const urgentTasks=tasks.filter(t=>!t.done&&t.urgency==='urgent').map(t=>t.text).join(', ')
+  const msg=`I'm Scott, owner of Thin Slizzy — rock n roll pizzeria at 115 Johnston St Collingwood, next to The Tote. Solo operator, ~$18k/week revenue, casual staff weekends.\n\nTonight's focus: ${d.focus||'not set'}\nTasks: ${done}/${tasks.length} done\n${urgentTasks?'URGENT tasks: '+urgentTasks:''}\nTentacles: ${ts}\nUpcoming events: ${(d.events||[]).slice(0,3).map(e=>e.name).join(', ')||'none'}\n\nWhat should I focus on right now? What am I missing?`
   window.open('https://claude.ai/new?q='+encodeURIComponent(msg),'_blank')
 }
 
-function renderAll(){renderHome();renderTentGrid();if(activeTent)renderTentDetail()}
+function renderAll(){renderHome();renderTentGrid();if(activeTent)renderTentDetail();if(document.getElementById('v-map').classList.contains('active'))drawMap()}
 
+// ── Init ──────────────────────────────────────
 const apiKey=localStorage.getItem(AK)
 if(apiKey){const btn=document.getElementById('api-btn');btn.textContent='API ✓';btn.classList.add('green')}
-document.getElementById('qa-input').addEventListener('keydown',e=>{if(e.key==='Enter')quickAdd()})
-document.getElementById('dump-text').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitDump()}})
 window.addEventListener('resize',()=>{if(document.getElementById('v-map').classList.contains('active'))drawMap()})
-renderHome();renderTentGrid();initRoster()
+setDailyQuote()
+renderHome()
+renderTentGrid()
+initRoster()
 </script>
 </body>
 </html>
