@@ -46,8 +46,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text)}
 .api-btn.set{border-color:rgba(78,203,110,0.3);color:var(--green)}
 
 /* Content */
-.content{flex:1;overflow:hidden}
-.view{height:100%;display:none;flex-direction:column}
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
+.view{flex:1;display:none;flex-direction:column;min-height:0}
 .view.active{display:flex}
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem 1.25rem calc(var(--sb) + 1rem)}
 
@@ -97,6 +97,9 @@ body{font-family:'DM Sans',sans-serif;color:var(--text)}
 .task-txt{font-size:13px;color:var(--text);flex:1;line-height:1.4}
 .task-txt.done{color:var(--muted);text-decoration:line-through}
 .task-tag{font-family:'DM Mono',monospace;font-size:9px;padding:2px 7px;border-radius:4px;flex-shrink:0;margin-top:2px}
+.item-plus{color:var(--red);font-size:16px;cursor:pointer;padding:0 4px;flex-shrink:0;line-height:1;opacity:0.5;font-weight:300}
+.item-plus:active{opacity:1}
+.item-add-btn{background:rgba(232,52,28,0.08);border:1px solid rgba(232,52,28,0.2);border-radius:6px;padding:2px 8px;font-size:10px;color:var(--red);cursor:pointer;font-family:"DM Mono",monospace;display:inline-block;margin-top:6px}
 .task-del{color:var(--muted);font-size:16px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1}
 .task-del:active{color:var(--red)}
 .empty-state{font-size:12px;color:var(--muted);font-style:italic;padding:8px 0}
@@ -155,8 +158,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--text)}
 .contact-action{font-family:'DM Mono',monospace;font-size:9px;padding:3px 9px;border-radius:6px;cursor:pointer;flex-shrink:0}
 
 /* Map view */
-.map-container{flex:1;position:relative;overflow:hidden}
-#map-canvas{width:100%;height:100%;display:block;cursor:pointer}
+.map-container{flex:1;position:relative;overflow:hidden;min-height:0}
+#map-canvas{position:absolute;top:0;left:0;width:100%;height:100%;display:block;cursor:pointer}
 .map-detail{position:absolute;bottom:0;left:0;right:0;background:var(--s1);border-radius:16px 16px 0 0;padding:14px 16px 16px;border-top:1px solid var(--b1);transform:translateY(100%);transition:transform 0.25s ease}
 .map-detail.show{transform:translateY(0)}
 .map-detail-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -570,7 +573,7 @@ function renderHome() {
       <div class="chk ${t.done?'done':''}"></div>
       <span class="task-txt ${t.done?'done':''}">${escHtml(t.text)}</span>
       ${t.tag?`<span class="task-tag" style="background:${t.tagColor}18;color:${t.tagColor}">${t.tag}</span>`:''}
-      <span class="task-del" onclick="event.stopPropagation();deleteTask(${i})">×</span>
+      <span class="task-pin" onclick="event.stopPropagation();addTaskToUrgent(${i})" title="Add to urgent">+</span><span class="item-plus" onclick="event.stopPropagation();pinTask(${i})" title="Mark urgent">!</span><span class="task-del" onclick="event.stopPropagation();deleteTask(${i})">×</span>
     </div>
   `).join('')
 
@@ -579,6 +582,16 @@ function renderHome() {
   document.getElementById('api-status-btn').className='api-btn'+(apiSet?' set':'')
 }
 
+function pinTask(i){
+  const d=load();d.tasks[i].tag="urgent";d.tasks[i].tagColor="#e8341c";
+  save(d);renderHome();showToast("Marked urgent ✓")
+}
+function addItemToToday(text,tag,color){
+  const d=load();
+  d.tasks.push({text,done:false,tag,tagColor:color});
+  save(d);renderHome();showToast("Added to today ✓");
+  switchTab("home",document.getElementById("tab-home"));
+}
 function toggleTask(i){const d=load();d.tasks[i].done=!d.tasks[i].done;save(d);renderHome();if(document.getElementById('v-map').classList.contains('active'))drawMap()}
 function deleteTask(i){const d=load();d.tasks.splice(i,1);save(d);renderHome()}
 
@@ -594,21 +607,66 @@ function renderCalendar(){
   const events=(d.calEvents||[]).sort((a,b)=>a.date.localeCompare(b.date))
   const list=document.getElementById('cal-list')
   if(!events.length){list.innerHTML='<div class="empty-state">No events yet</div>';return}
+  const statusColors={confirmed:'#4ecb6e',pending:'#f0a020',urgent:'#e8341c'}
   list.innerHTML=events.map((e,i)=>{
     const dt=new Date(e.date+'T00:00:00')
     const day=dt.getDate()
     const mon=dt.toLocaleString('en',{month:'short'}).toUpperCase()
-    return `<div class="cal-item">
+    const sc=statusColors[e.status||'pending']
+    return `<div class="cal-item" onclick="openEventDetail(${i})" style="cursor:pointer">
       <div class="cal-date"><div class="cal-day">${day}</div><div class="cal-mon">${mon}</div></div>
-      <div class="cal-info">
-        <div class="cal-name">${escHtml(e.name)}</div>
-        <div class="cal-detail">${escHtml(e.detail||'')}</div>
+      <div class="cal-info" style="flex:1">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="cal-name">${escHtml(e.name)}</div>
+          <span style="font-family:'DM Mono',monospace;font-size:8px;padding:1px 6px;border-radius:4px;background:${sc}18;color:${sc};flex-shrink:0">${e.status||'pending'}</span>
+        </div>
+        ${e.detail?`<div class="cal-detail">${escHtml(e.detail)}</div>`:''}
+        ${e.notes?`<div class="cal-detail" style="color:var(--muted);font-style:italic">${escHtml(e.notes.slice(0,60))}${e.notes.length>60?'…':''}</div>`:''}
         ${e.urgent?`<div class="cal-urgent">⚠ ${escHtml(e.urgent)}</div>`:''}
-        <span class="add-btn-sm" onclick="addCalToToday(${i})">+ add to today</span>
-        <span class="add-btn-sm" style="margin-left:4px;border-color:rgba(232,52,28,0.1);color:var(--muted)" onclick="deleteCalEvent(${i})">remove</span>
       </div>
+      <span style="color:var(--muted);font-size:18px;line-height:1;padding:0 4px">›</span>
     </div>`
   }).join('')
+}
+
+function openEventDetail(i){
+  const d=load(); const e=d.calEvents[i]
+  document.getElementById('modal-title').textContent='Edit Event'
+  document.getElementById('modal-body').innerHTML=`
+    <input type="text" id="m-cal-name" placeholder="Event name" value="${escHtml(e.name||'')}" />
+    <input type="date" id="m-cal-date" value="${e.date||''}" />
+    <input type="text" id="m-cal-detail" placeholder="Details e.g. 80 people · Fitzroy" value="${escHtml(e.detail||'')}" />
+    <input type="text" id="m-cal-urgent" placeholder="Urgent note" value="${escHtml(e.urgent||'')}" />
+    <textarea id="m-cal-notes" placeholder="Notes — add anything here...">${escHtml(e.notes||'')}</textarea>
+    <div style="margin-bottom:10px">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px">Status</div>
+      <div style="display:flex;gap:8px">
+        ${['pending','confirmed','urgent'].map(s=>`<div onclick="setEventStatus('${s}',this)" style="flex:1;padding:8px;border-radius:8px;text-align:center;cursor:pointer;font-family:'DM Mono',monospace;font-size:10px;border:1px solid ${e.status===s?({'pending':'rgba(240,160,32,0.4)','confirmed':'rgba(78,203,110,0.4)','urgent':'rgba(232,52,28,0.4)'}[s]):'var(--b1)'};background:${e.status===s?({'pending':'rgba(240,160,32,0.1)','confirmed':'rgba(78,203,110,0.1)','urgent':'rgba(232,52,28,0.1)'}[s]):'transparent'};color:${{ 'pending':'#f0a020','confirmed':'#4ecb6e','urgent':'#e8341c'}[s]}" data-status="${s}">${s}</div>`).join('')}
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <button onclick="addCalToToday(${i});closeModal()" style="flex:1;padding:10px;background:rgba(232,52,28,0.1);border:1px solid rgba(232,52,28,0.2);border-radius:10px;color:var(--red);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">+ add to today</button>
+      <button onclick="deleteCalEvent(${i});closeModal()" style="padding:10px 14px;background:transparent;border:1px solid var(--b1);border-radius:10px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer">Delete</button>
+    </div>
+  `
+  modalMode='cal-edit'
+  document.getElementById('modal').classList.add('show')
+  document.getElementById('m-cal-name').focus()
+  window._editingCalIdx=i
+  window._editingStatus=e.status||'pending'
+}
+
+function setEventStatus(s,el){
+  window._editingStatus=s
+  const statusColors={confirmed:'rgba(78,203,110,0.4)',pending:'rgba(240,160,32,0.4)',urgent:'rgba(232,52,28,0.4)'}
+  const statusBg={confirmed:'rgba(78,203,110,0.1)',pending:'rgba(240,160,32,0.1)',urgent:'rgba(232,52,28,0.1)'}
+  const statusText={confirmed:'#4ecb6e',pending:'#f0a020',urgent:'#e8341c'}
+  document.querySelectorAll('[data-status]').forEach(btn=>{
+    const bs=btn.dataset.status
+    btn.style.border='1px solid '+(bs===s?statusColors[bs]:'var(--b1)')
+    btn.style.background=bs===s?statusBg[bs]:'transparent'
+    btn.style.color=statusText[bs]
+  })
 }
 
 function addCalToToday(i){
@@ -664,7 +722,7 @@ function renderIdeas(){
     return `<div class="idea-card">
       <div class="idea-cat" style="color:${c}">${id.cat||'idea'}</div>
       <div class="idea-text">${escHtml(id.text)}<span class="idea-del" onclick="deleteIdea(${i})">×</span></div>
-      <span class="add-btn-sm" style="margin-top:6px" onclick="addIdeaToToday(${i})">+ add to today</span>
+      <span class="item-add-btn" onclick="addIdeaToToday(${i})">+ today</span>
     </div>`
   }).join('')
 }
@@ -734,8 +792,9 @@ function addNextGoalTask(gi){
 function drawMap(){
   const canvas=document.getElementById('map-canvas')
   const container=document.getElementById('v-map').querySelector('.map-container')
-  canvas.width=container.offsetWidth
-  canvas.height=container.offsetHeight
+  const rect=container.getBoundingClientRect()
+  canvas.width=Math.round(rect.width)||container.offsetWidth||window.innerWidth
+  canvas.height=Math.round(rect.height)||container.offsetHeight||(window.innerHeight-160)
   const ctx=canvas.getContext('2d')
   const d=load()
   const W=canvas.width,H=canvas.height
@@ -904,22 +963,33 @@ function openModal(mode){
 function closeModal(){document.getElementById('modal').classList.remove('show')}
 function saveModal(){
   const d=load()
+  const prevMode=modalMode
   if(modalMode==='focus'){const v=document.getElementById('m-focus')?.value.trim();if(v)d.focus=v}
   else if(modalMode==='cal'){
     const name=document.getElementById('m-cal-name')?.value.trim()
     const date=document.getElementById('m-cal-date')?.value
     const detail=document.getElementById('m-cal-detail')?.value.trim()
     const urgent=document.getElementById('m-cal-urgent')?.value.trim()
-    if(name&&date)d.calEvents.push({name,date,detail,urgent})
+    if(name&&date)d.calEvents.push({name,date,detail,urgent,status:'pending',notes:''})
+  } else if(modalMode==='cal-edit'){
+    const i=window._editingCalIdx
+    if(i!=null&&d.calEvents[i]){
+      d.calEvents[i].name=document.getElementById('m-cal-name')?.value.trim()||d.calEvents[i].name
+      d.calEvents[i].date=document.getElementById('m-cal-date')?.value||d.calEvents[i].date
+      d.calEvents[i].detail=document.getElementById('m-cal-detail')?.value.trim()||''
+      d.calEvents[i].urgent=document.getElementById('m-cal-urgent')?.value.trim()||''
+      d.calEvents[i].notes=document.getElementById('m-cal-notes')?.value||''
+      d.calEvents[i].status=window._editingStatus||'pending'
+    }
   } else if(modalMode==='goal'){
     const name=document.getElementById('m-goal-name')?.value.trim()
     const subsText=document.getElementById('m-goal-subs')?.value.trim()
     if(name){const subs=subsText?subsText.split('\n').filter(s=>s.trim()).map(s=>({text:s.trim(),done:false})):[];d.goals.push({name,subs})}
   }
   save(d); closeModal()
-  if(modalMode==='focus')renderHome()
-  else if(modalMode==='cal')renderCalendar()
-  else if(modalMode==='goal')renderGoals()
+  if(prevMode==='focus')renderHome()
+  else if(prevMode==='cal'||prevMode==='cal-edit')renderCalendar()
+  else if(prevMode==='goal')renderGoals()
   showToast('Saved ✓')
 }
 
