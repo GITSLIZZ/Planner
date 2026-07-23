@@ -1,23 +1,23 @@
 // build.mjs — Fetches live Notion data and rebuilds index.html
 // Run: node build.mjs
 // Requires: NOTION_TOKEN environment variable
-
+​
 import { writeFileSync } from 'fs';
-
+​
 const TOKEN = process.env.NOTION_TOKEN;
 if (!TOKEN) { console.error('ERROR: NOTION_TOKEN not set'); process.exit(1); }
-
+​
 const HEADERS = {
   'Authorization': `Bearer ${TOKEN}`,
   'Notion-Version': '2022-06-28'
 };
-
+​
 // Page IDs from SLIZZ CENTRAL workspace
 const PAGE_IDS = {
   commandCentre: '35db390e-e987-8078-8ae5-cc2597f6ef54',
   checklists:    '2a3b390e-e987-80a5-b1c9-f6981aad41e5',
 };
-
+​
 // --- Notion API helpers -----------------------------------------
 async function getBlocks(pageId) {
   const id = pageId.replace(/-/g, '');
@@ -27,13 +27,13 @@ async function getBlocks(pageId) {
   const data = await res.json();
   return data.results || [];
 }
-
+​
 function blockText(block) {
   const content = block[block.type];
   if (!content || !content.rich_text) return '';
   return content.rich_text.map(function(t) { return t.plain_text; }).join('').trim();
 }
-
+​
 // --- Fetch TODAY priorities from Command Centre -----------------
 async function fetchTodayFocus() {
   console.log('Fetching today focus from Command Centre...');
@@ -41,7 +41,7 @@ async function fetchTodayFocus() {
   const items = [];
   let inToday = false;
   let inPriorities = false;
-
+​
   for (const b of blocks) {
     const txt = blockText(b);
     if (b.type === 'heading_1' && txt.toUpperCase().includes('TODAY')) {
@@ -56,7 +56,7 @@ async function fetchTodayFocus() {
       if (txt) items.push(txt);
     }
   }
-
+​
   if (items.length > 0) {
     console.log('Found ' + items.length + ' focus items');
     return items;
@@ -64,19 +64,19 @@ async function fetchTodayFocus() {
   console.log('No focus items found, using default');
   return ['Check Command Centre for today priorities'];
 }
-
+​
 // --- Fetch checklists from CHECKLISTS page ---------------------
 async function fetchChecklists() {
   console.log('Fetching checklists from Notion...');
   const blocks = await getBlocks(PAGE_IDS.checklists);
-
+​
   const result = {
     pizza:    { daily: [], weekly: [] },
     bar:      { daily: [] },
     delivery: { daily: [], weekly: [] },
     owner:    { daily: [] }
   };
-
+​
   // Default fallbacks used when Notion sections are empty
   const defaults = {
     pizza: {
@@ -94,7 +94,7 @@ async function fetchChecklists() {
       daily: ['Open Circle T - Today','Ops Manager - what needs you today','Roster confirmed','Produce orders - anything overdue?','Catering enquiries actioned','Voice Notes cleared']
     }
   };
-
+​
   for (const block of blocks) {
     if (block.type !== 'toggle') continue;
     const title = blockText(block).toLowerCase();
@@ -104,12 +104,12 @@ async function fetchChecklists() {
     else if (title.includes('delivery')) role = 'delivery';
     else if (title.includes('owner')) role = 'owner';
     if (!role) continue;
-
+​
     const children = await getBlocks(block.id);
     for (const child of children) {
       const childText = blockText(child).toLowerCase();
       const period = childText.includes('weekly') ? 'weekly' : 'daily';
-
+​
       if (child.type === 'toggle') {
         if (!result[role][period]) result[role][period] = [];
         const items = await getBlocks(child.id);
@@ -125,7 +125,7 @@ async function fetchChecklists() {
       }
     }
   }
-
+​
   // Apply defaults for any empty sections
   for (const [role, periods] of Object.entries(result)) {
     for (const [period, items] of Object.entries(periods)) {
@@ -135,10 +135,10 @@ async function fetchChecklists() {
       }
     }
   }
-
+​
   return result;
 }
-
+​
 // --- Static data (update here when staff/contacts change) -------
 const STATIC = {
   CT_BASE: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au',
@@ -193,20 +193,20 @@ const STATIC = {
     {grp:'Owner Only',links:[{l:'Voice Notes',i:'&#127903;',p:'/voice-notes',t:5},{l:'Login Sessions',i:'&#128274;',p:'/login-sessions',t:5},{l:'Owner Portal',i:'&#128272;',p:'/owner-portal',t:5}]},
   ],
 };
-
+​
 // --- Build HTML -------------------------------------------------
 function buildHTML(todayFocus, checklists) {
   const d = Object.assign({}, STATIC, {
     TODAY_FOCUS: todayFocus,
     CHECKLISTS: checklists,
   });
-
+​
   const vars = Object.entries(d).map(function([k,v]) {
     return 'var ' + k + ' = ' + JSON.stringify(v) + ';';
   }).join('\n');
-
+​
   const ts = new Date().toLocaleString('en-AU', {timeZone:'Australia/Melbourne'});
-
+​
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -479,6 +479,7 @@ function clTab(id,el){var tabs=document.querySelectorAll('.cl-tb');for(var i=0;i
 function buildContacts(){var tl=tier();var visible=tl>=4?STAFF:STAFF.filter(function(s){return s.tag!=='owner';});var staffEl=document.getElementById('con-staff');if(staffEl){staffEl.innerHTML=visible.map(function(s){var col=ROLE_C[s.tag]||'#888';var ph=(s.p||'').replace(/\s/g,'');var note=s.note?'<div class="cno">'+s.note+'</div>':'';var call=ph?'<a href="tel:'+ph+'" class="ccall" style="background:'+col+'18">&#128222;</a>':'';return'<div class="ccard"><div class="cav" style="background:'+col+'20;color:'+col+'">'+s.n[0]+'</div><div class="ci"><div class="cn">'+s.n+'</div><div class="cr" style="color:'+col+'">'+s.r+'</div>'+note+'<div class="cno">'+(s.p||'No number')+'</div></div>'+call+'</div>';}).join('');}
 var supEl=document.getElementById('con-sup');if(supEl){if(tl>=3){supEl.innerHTML=SUPPLIERS.map(function(s){var m=(s.ct||'').match(/0[0-9 ]+/),ph=m?m[0].replace(/\s/g,''):'';var call=ph?'<a href="tel:'+ph+'" class="ccall" style="background:rgba(232,52,28,.1)">&#128222;</a>':'';return'<div class="supcard"><div class="sup-nm">'+s.nm+'</div><div class="sup-pr">'+s.pr+'</div><div class="sup-row"><div class="sup-ct">'+s.ct+(s.ct2?'<br>'+s.ct2:'')+'</div>'+call+'</div>'+(s.nt?'<div class="sup-nt">'+s.nt+'</div>':'')+'</div>';}).join('');}else{supEl.innerHTML='<div class="empty">Kitchen role required</div>';}}
 var trdEl=document.getElementById('con-trd');if(trdEl){if(tl>=3){trdEl.innerHTML=TRADIES.map(function(tr){var m=(tr.ct||'').match(/0[0-9 ]+/),ph=m?m[0].replace(/\s/g,''):'';var call=ph?'<a href="tel:'+ph+'" class="ccall" style="background:rgba(78,203,110,.1)">&#128222;</a>':'';return'<div class="ccard" style="align-items:flex-start"><div style="flex:1"><div class="cn">'+tr.tr+'</div><div class="cno" style="margin-top:3px">'+tr.ct+(tr.ct2?'<br>'+tr.ct2:'')+(tr.ct3?'<br>'+tr.ct3:'')+'</div>'+(tr.nt?'<div class="cno">'+tr.nt+'</div>':'')+'</div>'+call+'</div>';}).join('');}else{trdEl.innerHTML='<div class="empty">Kitchen role required</div>';}}
+}
 function buildCT(){var tl=tier(),html='';CT_GROUPS.forEach(function(g){var links=g.links.filter(function(l){return l.t<=tl;});if(!links.length)return;html+='<div class="ct-grp">'+g.grp+'</div>';links.forEach(function(l){html+='<a href="'+CT_BASE+l.p+'" target="_blank" class="ctlink"><div class="ct-ico">'+l.i+'</div><div class="ct-lbl">'+l.l+'</div><div class="ct-arr">&#8250;</div></a>';});});var ctBody=document.getElementById('ct-body');if(ctBody)ctBody.innerHTML=html||'<div class="empty">No links for your role</div>';}
 function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
 (function boot(){var ses=gS();if(ses&&ses.id){var u=USERS.filter(function(x){return x.id===ses.id;})[0];if(u&&Date.now()-ses.ts<86400000*7){curUser=u;unlock();return;}}document.getElementById('pin-screen').style.display='';})();
@@ -486,7 +487,7 @@ function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textCo
 </body>
 </html>`;
 }
-
+​
 // --- Main -------------------------------------------------------
 async function main() {
   console.log('Starting Notion sync...');
@@ -500,5 +501,5 @@ async function main() {
   writeFileSync('index.html', html, 'utf8');
   console.log('index.html written (' + html.length + ' chars)');
 }
-
+​
 main().catch(function(err) { console.error(err); process.exit(1); });
