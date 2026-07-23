@@ -539,6 +539,239 @@ function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 function showT(msg,err){const t=document.getElementById('toast');document.getElementById('toast-msg').textContent=msg;t.className='toast'+(err?' err':'');t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
 // Init
 ;(function(){const u=gU();sU(u);const ses=gSes();if(ses?.name){const usr=gU()[ses.pin];if(usr)bootApp(usr)}})();
+
+// === NOTION DATA (baked in from Notion, July 2026) ===
+const NOTION_STAFF=[
+ {n:'Krishna',r:'Head Chef',p:'0449500515',tag:'kitchen'},
+ {n:'Saroj Dahal',r:'Pizza Chef',p:'0452434511',tag:'kitchen'},
+ {n:'Antonio',r:'Pizza Chef',p:'+39363103180',note:'WhatsApp only',tag:'kitchen'},
+ {n:'Lucia',r:'Bartender',p:'',tag:'bar'},
+ {n:'Doss',r:'Bartender / Delivery',p:'0438730183',note:'Fri + Sat',tag:'bar'},
+ {n:'Lydia',r:'Backup Bartender',p:'0449593865',tag:'bar'},
+ {n:'Leaf',r:'Backup Pizza Chef',p:'0404905464',tag:'kitchen'},
+ {n:'Issaq',r:'Delivery / Dishy',p:'0470489279',note:'Wed + Sun',tag:'delivery'},
+ {n:'Dash',r:'Delivery / Dishy',p:'0452411697',tag:'delivery'},
+ {n:'MJ',r:'Delivery / Dishy',p:'0476914144',tag:'delivery'},
+ {n:'Ethan',r:'Delivery / Dishy',p:'0431630136',tag:'delivery'},
+ {n:'Tuck',r:'Backup Delivery',p:'0415686872',tag:'delivery'},
+ {n:'Scott',r:'Owner',p:'0406782963',tag:'owner'},
+];
+const NOTION_SUPPLIERS=[
+ {nm:'Azzurri',pr:'Meat / Cheese / Dry Goods',ct:'Roberto 0455 602 823',ct2:'Marcello 0413 960 602',nt:'Delivers Wed &amp; Fri'},
+ {nm:'Fitzroy Fruit &amp; Veg',pr:'Fruit &amp; Veg',ct:'0412 690 059',nt:'7 Days'},
+ {nm:'Paramount Liquor',pr:'Alcohol / Soft Drinks',ct:'paramountliquor.com.au',nt:'PW: SLIZZYparamount'},
+ {nm:'Ice Guys',pr:'Ice',ct:'James 0430 460 227',nt:'5 bag min / $30 for 5'},
+ {nm:'Bodriggy Beer',pr:'Stingrays / Utopia Kegs',ct:'0497 707 414',nt:''},
+ {nm:'Heaps Normal',pr:'Non-alc Beer',ct:'orders@heapsnormal.com',nt:''},
+ {nm:'Bandwagon Beverages',pr:'Wine / Spirits',ct:'0438 960 626',nt:'Gin / Vodka / Shiraz'},
+];
+const CT_BASE='https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au';
+const CT_LINKS=[
+ {l:'Clock In / Out',i:'&#9203;',p:'/clock-in-out',t:1},
+ {l:'Roster',i:'&#128203;',p:'/rosters',t:1},
+ {l:'Knowledge',i:'&#128218;',p:'/knowledge',t:1},
+ {l:'Produce Ordering',i:'&#128722;',p:'/produce-ordering',t:3},
+ {l:'Today Dashboard',i:'&#127919;',p:'/today',t:4},
+ {l:'Ops Manager (AI)',i:'&#129504;',p:'/ops-manager',t:4},
+ {l:'Smart Feed',i:'&#128225;',p:'/smart-feed',t:4},
+ {l:'Team Admin',i:'&#128101;',p:'/team-admin',t:4},
+ {l:'Catering Jobs',i:'&#127870;',p:'/catering',t:4},
+ {l:'COGS / Margins',i:'&#128202;',p:'/cogs',t:5},
+ {l:'Finances / P&amp;L',i:'&#128176;',p:'/finances',t:5},
+ {l:'Voice Notes',i:'&#127903;',p:'/voice-notes',t:5},
+ {l:'Owner Portal',i:'&#128272;',p:'/owner-portal',t:5},
+];
+const DAILY_CL=[
+ 'Open Circle T &#8594; Today',
+ 'Ops Manager &#8594; what needs you today',
+ 'Roster confirmed',
+ 'Produce orders &#8212; anything overdue?',
+ 'Catering enquiries actioned',
+ 'Voice Notes cleared',
+];
+const WEEKLY_RHYTHM=[
+ {d:'Mon',f:'Roster locked · Ops briefing'},
+ {d:'Tue',f:'Produce orders · Smart Feed'},
+ {d:'Wed',f:'Catering pipeline · follow-ups'},
+ {d:'Thu',f:'Voice Notes cleared · to-dos actioned'},
+ {d:'Fri',f:'COGS + Finances · Clock In/Out audit'},
+ {d:'Wknd',f:'Minimal. Let the system run.'},
+];
+
+// === NOTION DATA UI HELPERS ===
+function renderStaffDir(containerId, tierLevel) {
+ const el = document.getElementById(containerId);
+ if (!el) return;
+ const ROLE_COLORS = {kitchen:'#4ecb6e',bar:'#4a9eff',delivery:'#a070ff',owner:'#e8341c',manager:'#f0a020'};
+ const visible = tierLevel >= 4 ? NOTION_STAFF : NOTION_STAFF.filter(s => s.tag !== 'owner');
+ el.innerHTML = visible.map(s => {
+ const col = ROLE_COLORS[s.tag] || '#888';
+ const ph = (s.p || '').replace(/\s/g,'');
+ return `<div style="background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px">
+ <div style="width:38px;height:38px;border-radius:50%;background:${col}20;color:${col};display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;flex-shrink:0">${s.n[0]}</div>
+ <div style="flex:1;min-width:0">
+  <div style="font-size:14px;font-weight:500">${s.n}</div>
+  <div style="font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.07em;color:${col};margin-top:2px">${s.r}</div>
+  ${s.note ? `<div style="font-family:monospace;font-size:9px;color:var(--muted)">${s.note}</div>` : ''}
+  ${s.p ? `<div style="font-family:monospace;font-size:9px;color:var(--muted)">${s.p}</div>` : ''}
+ </div>
+ ${ph ? `<a href="tel:${ph}" style="width:36px;height:36px;border-radius:50%;background:${col}18;display:flex;align-items:center;justify-content:center;font-size:16px;text-decoration:none;flex-shrink:0">&#128222;</a>` : ''}
+</div>`;
+ }).join('');
+}
+
+function renderSuppliers(containerId) {
+ const el = document.getElementById(containerId);
+ if (!el) return;
+ el.innerHTML = NOTION_SUPPLIERS.map(s => {
+ const m = (s.ct || '').match(/0[0-9 ]+/);
+ const ph = m ? m[0].replace(/\s/g,'') : '';
+ return `<div style="background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:8px">
+ <div style="font-size:14px;font-weight:600;margin-bottom:2px">${s.nm}</div>
+ <div style="font-family:monospace;font-size:9px;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px">${s.pr}</div>
+ <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+  <div style="font-size:12px;flex:1">${s.ct}${s.ct2 ? '<br/>' + s.ct2 : ''}</div>
+  ${ph ? `<a href="tel:${ph}" style="width:34px;height:34px;border-radius:50%;background:rgba(232,52,28,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;text-decoration:none;flex-shrink:0">&#128222;</a>` : ''}
+ </div>
+ ${s.nt ? `<div style="font-family:monospace;font-size:9px;color:#f0a020;margin-top:4px">${s.nt}</div>` : ''}
+</div>`;
+ }).join('');
+}
+
+function renderCTLinks(containerId, tierLevel) {
+ const el = document.getElementById(containerId);
+ if (!el) return;
+ const links = CT_LINKS.filter(l => l.t <= tierLevel);
+ el.innerHTML = links.map(l =>
+ `<a href="${CT_BASE}${l.p}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;text-decoration:none;color:var(--text)">
+ <div style="font-size:20px;width:30px;text-align:center;flex-shrink:0">${l.i}</div>
+ <div style="font-size:13px;font-weight:500;flex:1">${l.l}</div>
+ <div style="color:var(--muted);font-size:14px">&#8250;</div>
+ </a>`
+ ).join('');
+}
+
+function renderDailyCL(containerId, stateArr) {
+ const el = document.getElementById(containerId);
+ if (!el) return;
+ el.innerHTML = DAILY_CL.map((t,i) =>
+ `<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1)" onclick="togDailyCL(${i},this)">
+ <div id="dcl-${i}" style="width:20px;height:20px;border-radius:6px;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all 0.15s"></div>
+ <div style="font-size:13px;line-height:1.4" id="dct-${i}">${t}</div>
+ </div>`
+ ).join('');
+}
+function togDailyCL(i, row) {
+ const chk = document.getElementById('dcl-'+i);
+ const txt = document.getElementById('dct-'+i);
+ const on = !chk.dataset.on;
+ chk.dataset.on = on ? '1' : '';
+ chk.style.background = on ? 'var(--green)' : 'transparent';
+ chk.style.borderColor = on ? 'var(--green)' : 'var(--b2)';
+ chk.innerHTML = on ? '<div style="width:9px;height:5px;border-left:2px solid #0a0a08;border-bottom:2px solid #0a0a08;transform:rotate(-45deg) translateY(-1px)"></div>' : '';
+ txt.style.color = on ? 'var(--muted)' : '';
+ txt.style.textDecoration = on ? 'line-through' : '';
+}
+
+function renderWeekly(containerId) {
+ const el = document.getElementById(containerId);
+ if (!el) return;
+ const today = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
+ el.innerHTML = WEEKLY_RHYTHM.map(w =>
+ `<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1)">
+ <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;color:${w.d===today?'var(--red)':'var(--muted)'};width:44px;flex-shrink:0">${w.d}</div>
+ <div style="font-size:12px;line-height:1.4;flex:1;color:rgba(242,240,232,0.65)">${w.f}</div>
+ </div>`
+ ).join('');
+}
+
+// === WIRING NOTION DATA INTO UI ===
+function getTierLevel() {
+ const role = curUser?.role || curUser?.tier || 'delivery';
+ const TIER_MAP = {owner:5,manager:4,kitchen:3,bar:2,delivery:1};
+ return TIER_MAP[role] || 1;
+}
+
+function applyNotionData(view) {
+ const tier = getTierLevel();
+ // After rendering a cat view, inject Notion panels
+ setTimeout(() => {
+ const scr = document.querySelector('#app-body .scroll');
+ if (!scr) return;
+
+ if (view === 'people') {
+ // Add staff directory
+ let staffDiv = document.createElement('div');
+ staffDiv.innerHTML = '<div class="slabel" style="margin-top:18px">Staff Directory</div><div id="nd-staff"></div>';
+ scr.appendChild(staffDiv);
+ renderStaffDir('nd-staff', tier);
+ // Add Circle T links
+ let ctDiv = document.createElement('div');
+ ctDiv.innerHTML = '<div class="slabel" style="margin-top:18px">Circle T Links</div><div id="nd-ppl-ct"></div>';
+ scr.appendChild(ctDiv);
+ const pplLinks = CT_LINKS.filter(l => l.t <= tier && [1,4,5].includes(l.t));
+ document.getElementById('nd-ppl-ct').innerHTML = pplLinks.map(l =>
+ `<a href="${CT_BASE}${l.p}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;text-decoration:none;color:var(--text)"><div style="font-size:18px;width:28px;text-align:center">${l.i}</div><div style="font-size:13px;font-weight:500;flex:1">${l.l}</div><div style="color:var(--muted)">&#8250;</div></a>`
+ ).join('');
+ }
+
+ if (view === 'ops') {
+ if (tier >= 3) {
+ let supDiv = document.createElement('div');
+ supDiv.innerHTML = '<div class="slabel" style="margin-top:18px">Suppliers</div><div id="nd-suppliers"></div>';
+ scr.appendChild(supDiv);
+ renderSuppliers('nd-suppliers');
+ }
+ // Circle T ops links
+ let ctDiv = document.createElement('div');
+ ctDiv.innerHTML = '<div class="slabel" style="margin-top:18px">Circle T</div><div id="nd-ops-ct"></div>';
+ scr.appendChild(ctDiv);
+ const opsLinks = CT_LINKS.filter(l => l.t <= tier);
+ document.getElementById('nd-ops-ct').innerHTML = opsLinks.map(l =>
+ `<a href="${CT_BASE}${l.p}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;text-decoration:none;color:var(--text)"><div style="font-size:18px;width:28px;text-align:center">${l.i}</div><div style="font-size:13px;font-weight:500;flex:1">${l.l}</div><div style="color:var(--muted)">&#8250;</div></a>`
+ ).join('');
+ }
+
+ if (view === 'growth') {
+ // Catering and financial links for growth
+ let ctDiv = document.createElement('div');
+ ctDiv.innerHTML = '<div class="slabel" style="margin-top:18px">Circle T</div><div id="nd-gro-ct"></div>';
+ scr.appendChild(ctDiv);
+ const groLinks = CT_LINKS.filter(l => l.t <= tier && l.t >= 4);
+ document.getElementById('nd-gro-ct').innerHTML = groLinks.map(l =>
+ `<a href="${CT_BASE}${l.p}" target="_blank" style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;margin-bottom:8px;text-decoration:none;color:var(--text)"><div style="font-size:18px;width:28px;text-align:center">${l.i}</div><div style="font-size:13px;font-weight:500;flex:1">${l.l}</div><div style="color:var(--muted)">&#8250;</div></a>`
+ ).join('');
+ }
+ }, 50);
+}
+
+function applyHomeNotionData() {
+ const tier = getTierLevel();
+ if (tier < 4) return; // owner/manager only
+ setTimeout(() => {
+ const scr = document.querySelector('#app-body .scroll');
+ if (!scr) return;
+ // Daily checklist at top
+ const clWrap = document.createElement('div');
+ clWrap.innerHTML = '<div class="slabel">Daily Checklist</div><div style="background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:4px 12px;margin-bottom:12px" id="nd-daily-cl"></div>';
+ scr.insertBefore(clWrap, scr.firstChild);
+ renderDailyCL('nd-daily-cl', []);
+ }, 50);
+}
+
+function applyAdminNotionData() {
+ const tier = getTierLevel();
+ if (tier < 4) return;
+ setTimeout(() => {
+ const scr = document.querySelector('#app-body .scroll');
+ if (!scr) return;
+ // Weekly rhythm
+ const wWrap = document.createElement('div');
+ wWrap.innerHTML = '<div class="slabel" style="margin-top:18px">Weekly Rhythm</div><div style="background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:4px 12px;margin-bottom:12px" id="nd-weekly"></div>';
+ scr.insertBefore(wWrap, scr.firstChild);
+ renderWeekly('nd-weekly');
+ }, 50);
+}
 </script>
 </body>
 </html>
