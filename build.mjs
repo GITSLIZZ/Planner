@@ -1,0 +1,504 @@
+// build.mjs — Fetches live Notion data and rebuilds index.html
+// Run: node build.mjs
+// Requires: NOTION_TOKEN environment variable
+
+import { writeFileSync } from 'fs';
+
+const TOKEN = process.env.NOTION_TOKEN;
+if (!TOKEN) { console.error('ERROR: NOTION_TOKEN not set'); process.exit(1); }
+
+const HEADERS = {
+  'Authorization': `Bearer ${TOKEN}`,
+  'Notion-Version': '2022-06-28'
+};
+
+// Page IDs from SLIZZ CENTRAL workspace
+const PAGE_IDS = {
+  commandCentre: '35db390e-e987-8078-8ae5-cc2597f6ef54',
+  checklists:    '2a3b390e-e987-80a5-b1c9-f6981aad41e5',
+};
+
+// --- Notion API helpers -----------------------------------------
+async function getBlocks(pageId) {
+  const id = pageId.replace(/-/g, '');
+  const url = 'https://api.notion.com/v1/blocks/' + id + '/children?page_size=100';
+  const res = await fetch(url, { headers: HEADERS });
+  if (!res.ok) { console.warn('Notion API error', res.status, await res.text()); return []; }
+  const data = await res.json();
+  return data.results || [];
+}
+
+function blockText(block) {
+  const content = block[block.type];
+  if (!content || !content.rich_text) return '';
+  return content.rich_text.map(function(t) { return t.plain_text; }).join('').trim();
+}
+
+// --- Fetch TODAY priorities from Command Centre -----------------
+async function fetchTodayFocus() {
+  console.log('Fetching today focus from Command Centre...');
+  const blocks = await getBlocks(PAGE_IDS.commandCentre);
+  const items = [];
+  let inToday = false;
+  let inPriorities = false;
+
+  for (const b of blocks) {
+    const txt = blockText(b);
+    if (b.type === 'heading_1' && txt.toUpperCase().includes('TODAY')) {
+      inToday = true; inPriorities = false; continue;
+    }
+    if (inToday && b.type === 'heading_1') break;
+    if (inToday && b.type === 'heading_2' && txt.toLowerCase().includes('priorit')) {
+      inPriorities = true; continue;
+    }
+    if (inToday && inPriorities && b.type === 'heading_2') break;
+    if (inPriorities && b.type === 'bulleted_list_item') {
+      if (txt) items.push(txt);
+    }
+  }
+
+  if (items.length > 0) {
+    console.log('Found ' + items.length + ' focus items');
+    return items;
+  }
+  console.log('No focus items found, using default');
+  return ['Check Command Centre for today priorities'];
+}
+
+// --- Fetch checklists from CHECKLISTS page ---------------------
+async function fetchChecklists() {
+  console.log('Fetching checklists from Notion...');
+  const blocks = await getBlocks(PAGE_IDS.checklists);
+
+  const result = {
+    pizza:    { daily: [], weekly: [] },
+    bar:      { daily: [] },
+    delivery: { daily: [], weekly: [] },
+    owner:    { daily: [] }
+  };
+
+  // Default fallbacks used when Notion sections are empty
+  const defaults = {
+    pizza: {
+      daily: ['Ovens on - sweep and scrape out','Doughs out of fridge and balled up','WIX phone set up','Organise and prioritise prep list','Check older stock (sniff test)','Rotate and put away new stock','Doughs made for next couple days','WIX delivery times correct','Pizza paddles cleaned','Dirty dishes to sink area','Cling wrap dixies and lids on','Dough in fridge','Benches dry and wiped down','Sink cleaned and sanitised','Floors swept and mopped','Prep and order list done','Marble and glass cleaned','Defrost for tomorrow if needed','Pizza trays washed'],
+      weekly: ['Clean top of oven','Sweep under oven','Clean fridge dust filters','Check fan and repair','Defrost freezer','Stock take efficiency report']
+    },
+    bar: {
+      daily: ['Bar set up complete','Glasses polished and stocked','Fridges stocked and temps checked','Till float counted','Music on and ambiance set','Menus out','Bar wiped and sanitised','End of night: cash-up done','Bar surfaces cleaned','Glasses washed and put away','Fridges restocked for next day','Bins emptied']
+    },
+    delivery: {
+      daily: ['Bikes charged and tyres pumped','Check delivery boxes and straps','Check delivery float','Turn on online orders (WIX / Uber / DoorDash)','Test delivery phone','Confirm order radius and delivery times','Check helmets, lights and locks','Clean delivery bags','Wipe bikes after service','Record any damage'],
+      weekly: ['Tyre pressure check','Lube bike chains','Brake test and adjust pads','Clean bike frames','Replace damaged straps and Velcro','Deep clean delivery area','Inventory of boxes and spares']
+    },
+    owner: {
+      daily: ['Open Circle T - Today','Ops Manager - what needs you today','Roster confirmed','Produce orders - anything overdue?','Catering enquiries actioned','Voice Notes cleared']
+    }
+  };
+
+  for (const block of blocks) {
+    if (block.type !== 'toggle') continue;
+    const title = blockText(block).toLowerCase();
+    let role = null;
+    if (title.includes('pizza') || title.includes('kitchen')) role = 'pizza';
+    else if (title.includes('bar')) role = 'bar';
+    else if (title.includes('delivery')) role = 'delivery';
+    else if (title.includes('owner')) role = 'owner';
+    if (!role) continue;
+
+    const children = await getBlocks(block.id);
+    for (const child of children) {
+      const childText = blockText(child).toLowerCase();
+      const period = childText.includes('weekly') ? 'weekly' : 'daily';
+
+      if (child.type === 'toggle') {
+        if (!result[role][period]) result[role][period] = [];
+        const items = await getBlocks(child.id);
+        for (const item of items) {
+          if (['to_do','bulleted_list_item','numbered_list_item'].includes(item.type)) {
+            const t = blockText(item);
+            if (t) result[role][period].push(t);
+          }
+        }
+      } else if (['to_do','bulleted_list_item'].includes(child.type)) {
+        const t = blockText(child);
+        if (t) result[role].daily.push(t);
+      }
+    }
+  }
+
+  // Apply defaults for any empty sections
+  for (const [role, periods] of Object.entries(result)) {
+    for (const [period, items] of Object.entries(periods)) {
+      if (items.length === 0 && defaults[role] && defaults[role][period]) {
+        result[role][period] = defaults[role][period];
+        console.log('Using default for ' + role + ':' + period);
+      }
+    }
+  }
+
+  return result;
+}
+
+// --- Static data (update here when staff/contacts change) -------
+const STATIC = {
+  CT_BASE: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au',
+  STAFF: [
+    {n:'Krishna',r:'Head Chef',p:'0449500515',tag:'kitchen'},
+    {n:'Saroj Dahal',r:'Pizza Chef',p:'0452434511',tag:'kitchen'},
+    {n:'Antonio',r:'Pizza Chef',p:'',note:'+39 366 310 1380 (WhatsApp)',tag:'kitchen'},
+    {n:'Leaf',r:'Backup Pizza Chef',p:'0404905464',tag:'kitchen'},
+    {n:'Lucia',r:'Bartender',p:'',tag:'bar'},
+    {n:'Doss',r:'Bartender / Delivery',p:'0438730183',note:'Fri + Sat',tag:'bar'},
+    {n:'Lydia',r:'Backup Bartender',p:'0449593865',tag:'bar'},
+    {n:'Issaq',r:'Delivery / Dishy',p:'0470489279',note:'Wed + Sun',tag:'delivery'},
+    {n:'Dash',r:'Delivery / Dishy',p:'0452411697',tag:'delivery'},
+    {n:'MJ',r:'Delivery / Dishy',p:'0476914144',tag:'delivery'},
+    {n:'Ethan',r:'Delivery / Dishy',p:'0431630136',tag:'delivery'},
+    {n:'Tuck',r:'Backup Delivery',p:'0415686872',tag:'delivery'},
+    {n:'Scott',r:'Owner',p:'0406782963',tag:'owner'},
+  ],
+  SUPPLIERS: [
+    {nm:'Azzurri',pr:'Meat / Cheese / Dry Goods',ct:'Roberto 0455 602 823',ct2:'Marcello 0413 960 602',nt:'Delivers Wed & Fri | Pay: accounts@azzurrifoods.com.au'},
+    {nm:'Fitzroy Fruit & Veg',pr:'Fruit & Veg',ct:'0412 690 059',nt:'7 Days'},
+    {nm:'Paramount Liquor',pr:'Alcohol / Soft Drinks',ct:'paramountliquor.com.au',nt:'PW: SLIZZYparamount'},
+    {nm:'Ice Guys',pr:'Ice',ct:'James 0430 460 227',nt:'5 bag min / $30 for 5'},
+    {nm:'Bodriggy Beer',pr:'Stingrays / Utopia Kegs',ct:'0497 707 414',nt:''},
+    {nm:'Heaps Normal',pr:'Non-alc Beer',ct:'orders@heapsnormal.com',nt:''},
+    {nm:'Bandwagon Beverages',pr:'Wine / Spirits / Gin',ct:'0438 960 626',nt:'Gin / Vodka / Shiraz'},
+  ],
+  TRADIES: [
+    {tr:'Plumber',ct:'Kev 0418 587 076',ct2:'Danny 0415 584 232',ct3:'Paddy 0428 992 375'},
+    {tr:'Builder',ct:'Alex Spark 0433 865 185',ct2:'Alex Taylor 0401 738 735'},
+    {tr:'Painters',ct:'Stan 0436 000 428',ct2:'Nash 0423 358 387',nt:'Knows other tradies'},
+    {tr:'Pest Control',ct:'365 Pest Control 0433 949 536',nt:'Every 3 months'},
+    {tr:'Grease Trap',ct:'Turd Burglars',nt:'Every 2 months'},
+    {tr:'Extraction Fan',ct:'CGC (03) 9329 2411'},
+    {tr:'Dishwasher Service',ct:'Armiya 0481 239 866'},
+    {tr:'E-bike Service',ct:'Reuben 0412 052 707'},
+  ],
+  USERS: [
+    {id:'scott',name:'Scott',role:'owner',tag:'Owner',tier:5,pin:'2412',col:'#e8341c'},
+    {id:'krishna',name:'Krishna',role:'Head Chef',tag:'Kitchen',tier:3,pin:'1111',col:'#f5a623'},
+    {id:'saroj',name:'Saroj',role:'Pizza Chef',tag:'Kitchen',tier:2,pin:'2222',col:'#f5a623'},
+    {id:'lucia',name:'Lucia',role:'Bartender',tag:'Bar',tier:2,pin:'3333',col:'#4ecb6e'},
+    {id:'doss',name:'Doss',role:'Bartender',tag:'Bar',tier:2,pin:'4444',col:'#4ecb6e'},
+    {id:'issaq',name:'Issaq',role:'Delivery',tag:'Delivery',tier:1,pin:'5555',col:'#5b8def'},
+    {id:'dash',name:'Dash',role:'Delivery',tag:'Delivery',tier:1,pin:'6666',col:'#5b8def'},
+  ],
+  CT_GROUPS: [
+    {grp:'Command',links:[{l:'Today Dashboard',i:'&#127919;',p:'/today',t:4},{l:'Ops Manager (AI)',i:'&#129504;',p:'/ops-manager',t:4},{l:'Search',i:'&#128269;',p:'/search',t:3}]},
+    {grp:'Staff',links:[{l:'Clock In / Out',i:'&#9203;',p:'/clock-in-out',t:1},{l:'Rosters',i:'&#128203;',p:'/rosters',t:1},{l:'Team Admin',i:'&#128101;',p:'/team-admin',t:4}]},
+    {grp:'Supply',links:[{l:'Produce Ordering',i:'&#128722;',p:'/produce-ordering',t:3},{l:'Smart Feed',i:'&#128225;',p:'/smart-feed',t:4},{l:'Knowledge Base',i:'&#128218;',p:'/knowledge',t:1},{l:'Documents',i:'&#128196;',p:'/documents',t:3}]},
+    {grp:'Revenue',links:[{l:'Catering Jobs',i:'&#127870;',p:'/catering',t:4},{l:'COGS and Margins',i:'&#128202;',p:'/cogs',t:5},{l:'Finances and P&L',i:'&#128176;',p:'/finances',t:5}]},
+    {grp:'Owner Only',links:[{l:'Voice Notes',i:'&#127903;',p:'/voice-notes',t:5},{l:'Login Sessions',i:'&#128274;',p:'/login-sessions',t:5},{l:'Owner Portal',i:'&#128272;',p:'/owner-portal',t:5}]},
+  ],
+};
+
+// --- Build HTML -------------------------------------------------
+function buildHTML(todayFocus, checklists) {
+  const d = Object.assign({}, STATIC, {
+    TODAY_FOCUS: todayFocus,
+    CHECKLISTS: checklists,
+  });
+
+  const vars = Object.entries(d).map(function([k,v]) {
+    return 'var ' + k + ' = ' + JSON.stringify(v) + ';';
+  }).join('\n');
+
+  const ts = new Date().toLocaleString('en-AU', {timeZone:'Australia/Melbourne'});
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SLIZZ</title>
+<!-- Built from Notion: ${ts} AEST -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+ --bg:#0a0a08;--s1:#141412;--s2:#1c1c19;--s3:#242420;
+ --b1:#2a2a26;--b2:#333330;--tx:#f0efe8;--mu:#7a7a72;
+ --red:#e8341c;--grn:#4ecb6e;--amb:#f5a623;--blu:#5b8def;
+ --sab:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--tx);font-family:'DM Sans',sans-serif;overflow:hidden}
+.app{display:flex;flex-direction:column;height:100%;height:100dvh}
+.pin-screen{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.pin-logo{font-family:'Bebas Neue',sans-serif;font-size:56px;letter-spacing:.08em;color:var(--tx)}
+.pin-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);letter-spacing:.2em;text-transform:uppercase;margin-top:-18px}
+.pin-dots{display:flex;gap:14px;height:36px;align-items:center}
+.pd{width:13px;height:13px;border-radius:50%;background:var(--b2);transition:all .15s}
+.pd.on{background:var(--tx)}
+.pin-err{font-family:'DM Mono',monospace;font-size:10px;color:var(--red);height:16px;letter-spacing:.06em;opacity:0;transition:opacity .2s}
+.pin-err.show{opacity:1}
+.npad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:292px}
+.nk{height:74px;border-radius:16px;background:var(--s1);border:1px solid var(--b1);color:var(--tx);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;transition:all .11s;user-select:none}
+.nk:active{background:var(--s3);transform:scale(.93)}
+.nk-n{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1}
+.nk-s{font-family:'DM Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.1em;text-transform:uppercase}
+.nk-gh{background:transparent;border-color:transparent}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;flex-shrink:0;border-bottom:1px solid var(--b1)}
+.hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.06em}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.hbtn{width:34px;height:34px;border-radius:10px;background:var(--s1);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;user-select:none}
+.utag{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.1em;padding:4px 9px;border-radius:20px;border:1px solid currentColor}
+.time-pill{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);letter-spacing:.04em}
+.body{display:flex;flex:1;overflow:hidden;position:relative}
+.pnl{position:absolute;inset:0;display:none;flex-direction:column}
+.pnl.on{display:flex}
+.phdr{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--b1);flex-shrink:0;gap:12px}
+.ptitle{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.12em;flex:1}
+.bk{width:32px;height:32px;border-radius:10px;background:var(--s1);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0}
+.ibtn{width:32px;height:32px;border-radius:10px;background:var(--s1);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;flex-shrink:0}
+.scrl{flex:1;overflow-y:auto;padding:14px 16px;-webkit-overflow-scrolling:touch}
+.scrl::-webkit-scrollbar{display:none}
+.home-user{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:12px 14px;margin-bottom:14px}
+.home-av{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.home-name{font-size:16px;font-weight:600}
+.home-role{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.1em;color:var(--mu)}
+.home-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);margin-left:auto}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.12em;color:var(--mu);margin-bottom:8px}
+.focus-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.focus-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:.06em;margin-bottom:8px}
+.focus-item{display:flex;align-items:flex-start;gap:8px;padding:5px 0}
+.focus-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0;margin-top:4px}
+.cl-summary{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:14px;cursor:pointer}
+.cl-sum-row{display:flex;align-items:center;gap:10px;padding:4px 0}
+.cl-sum-lbl{flex:1;font-size:12px}
+.cl-sum-bar{width:80px;height:3px;background:var(--b2);border-radius:2px;overflow:hidden;flex-shrink:0}
+.cl-sum-fill{height:100%;border-radius:2px;background:var(--grn);transition:width .3s}
+.cl-sum-pct{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:28px;text-align:right;flex-shrink:0}
+.tlist{margin-top:14px}
+.titem{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--b1)}
+.titem:last-child{border-bottom:none}
+.tchk{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--b2);flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;margin-top:1px}
+.tchk.on{background:var(--grn);border-color:var(--grn)}
+.tchk.on::after{content:'';width:9px;height:5px;border-left:2px solid #0a0a08;border-bottom:2px solid #0a0a08;transform:rotate(-45deg) translateY(-1px);display:block}
+.ttxt{font-size:13px;flex:1;line-height:1.4}
+.ttxt.on{text-decoration:line-through;color:var(--mu)}
+.tcat{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.08em;opacity:.6;margin-top:2px}
+.task-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;display:none;align-items:flex-end}
+.task-modal.on{display:flex}
+.task-sheet{background:var(--s2);border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-height:80vh;overflow-y:auto}
+.task-inp{width:100%;background:var(--s1);border:1px solid var(--b2);border-radius:10px;padding:10px 12px;color:var(--tx);font-size:14px;font-family:'DM Sans',sans-serif;resize:none;outline:none}
+.task-row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.task-tag{font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;padding:5px 10px;border-radius:20px;border:1px solid var(--b2);cursor:pointer;user-select:none}
+.task-tag.on{background:var(--s3);border-color:var(--mu)}
+.tsave{width:100%;padding:13px;background:var(--red);border:none;border-radius:12px;color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
+.ccard{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.cav{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.ci{flex:1;min-width:0}
+.cn{font-size:14px;font-weight:600}
+.cr{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.08em}
+.cno{font-size:11px;color:var(--mu);margin-top:2px}
+.ccall{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;text-decoration:none}
+.supcard{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.sup-nm{font-size:14px;font-weight:600;margin-bottom:2px}
+.sup-pr{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.sup-row{display:flex;align-items:flex-start;gap:8px}
+.sup-ct{flex:1;font-size:12px;color:var(--mu);line-height:1.5}
+.sup-nt{font-size:11px;color:var(--mu);margin-top:6px;padding-top:6px;border-top:1px solid var(--b1)}
+.cl-tab{display:flex;gap:6px;margin-bottom:12px;padding:2px;background:var(--s2);border-radius:10px}
+.cl-tb{flex:1;padding:7px 4px;text-align:center;font-family:'DM Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);border-radius:8px;cursor:pointer;user-select:none;transition:all .14s}
+.cl-tb.on{background:var(--s1);color:var(--tx)}
+.cl-body{display:none}.cl-body.on{display:block}
+.cl-prog{display:flex;align-items:center;gap:8px;padding:6px 0}
+.cl-prog-bar{flex:1;height:4px;background:var(--b2);border-radius:2px;overflow:hidden}
+.cl-prog-fill{height:100%;border-radius:2px;background:var(--grn);transition:width .3s}
+.cl-prog-txt{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);white-space:nowrap}
+.cl-reset{font-family:'DM Mono',monospace;font-size:9px;color:var(--red);cursor:pointer;padding:2px 4px;user-select:none}
+.cl-section{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:4px 14px;margin-bottom:10px}
+.clitem{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--b1);cursor:pointer;user-select:none}
+.clitem:last-child{border-bottom:none}
+.clchk{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--b2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all .14s}
+.clchk.on{background:var(--grn);border-color:var(--grn)}
+.clchk.on::after{content:'';width:9px;height:5px;border-left:2px solid #0a0a08;border-bottom:2px solid #0a0a08;transform:rotate(-45deg) translateY(-1px);display:block}
+.cltxt{font-size:13px;line-height:1.4;flex:1}.cltxt.on{color:var(--mu);text-decoration:line-through}
+.ct-grp{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:.12em;text-transform:uppercase;margin:16px 0 6px 2px}.ct-grp:first-child{margin-top:0}
+.ctlink{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:12px 14px;margin-bottom:8px;text-decoration:none;color:var(--tx)}
+.ct-ico{font-size:20px;width:32px;text-align:center;flex-shrink:0}
+.ct-lbl{flex:1;font-size:13px;font-weight:500}
+.ct-arr{color:var(--mu);font-size:18px}
+.bnav{display:flex;background:var(--s1);border-top:1px solid var(--b1);padding:6px 4px calc(var(--sab)+8px);flex-shrink:0;justify-content:space-around}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0;user-select:none;min-width:0}
+.ni-ic{font-size:22px;opacity:.3;transition:opacity .14s;line-height:1.1}
+.ni-lb{font-family:'DM Mono',monospace;font-size:8px;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);transition:color .14s}
+.ni.on .ni-ic{opacity:1}
+.ni.on .ni-lb{color:var(--tx)}
+.fab{width:48px;height:48px;border-radius:16px;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:24px;color:#fff;box-shadow:0 4px 16px rgba(232,52,28,.4);cursor:pointer;user-select:none}
+.empty{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);text-align:center;padding:32px 0;letter-spacing:.06em}
+.toast{position:fixed;bottom:calc(var(--sab)+80px);left:50%;transform:translateX(-50%);background:var(--s1);border:1px solid var(--b1);border-radius:20px;padding:8px 18px;font-family:'DM Mono',monospace;font-size:10px;color:var(--tx);letter-spacing:.06em;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:200}
+.toast.show{opacity:1}
+.notion-badge{position:fixed;top:8px;right:8px;font-family:'DM Mono',monospace;font-size:7px;color:var(--mu);letter-spacing:.06em;z-index:50;opacity:.5}
+</style>
+</head>
+<body>
+<div class="notion-badge">&#128279; Notion sync: ${ts}</div>
+<div class="pin-screen" id="pin-screen">
+ <div class="pin-logo">SLIZZ</div>
+ <div class="pin-sub">Enter your PIN to continue</div>
+ <div class="pin-dots">
+  <div class="pd" id="d0"></div><div class="pd" id="d1"></div><div class="pd" id="d2"></div><div class="pd" id="d3"></div>
+ </div>
+ <div class="pin-err" id="pin-err">Incorrect PIN</div>
+ <div class="npad">
+  <button class="nk" onclick="pp('1')"><div class="nk-n">1</div></button>
+  <button class="nk" onclick="pp('2')"><div class="nk-n">2</div><div class="nk-s">ABC</div></button>
+  <button class="nk" onclick="pp('3')"><div class="nk-n">3</div><div class="nk-s">DEF</div></button>
+  <button class="nk" onclick="pp('4')"><div class="nk-n">4</div><div class="nk-s">GHI</div></button>
+  <button class="nk" onclick="pp('5')"><div class="nk-n">5</div><div class="nk-s">JKL</div></button>
+  <button class="nk" onclick="pp('6')"><div class="nk-n">6</div><div class="nk-s">MNO</div></button>
+  <button class="nk" onclick="pp('7')"><div class="nk-n">7</div><div class="nk-s">PQRS</div></button>
+  <button class="nk" onclick="pp('8')"><div class="nk-n">8</div><div class="nk-s">TUV</div></button>
+  <button class="nk" onclick="pp('9')"><div class="nk-n">9</div><div class="nk-s">WXYZ</div></button>
+  <button class="nk nk-gh"></button>
+  <button class="nk" onclick="pp('0')"><div class="nk-n">0</div></button>
+  <button class="nk nk-gh" onclick="pd()"><div class="nk-n" style="font-size:20px">&#9003;</div></button>
+ </div>
+</div>
+<div class="app" id="app" style="display:none">
+ <div class="hdr">
+  <div class="hdr-logo">SLIZZ</div>
+  <div class="hdr-r">
+   <div class="time-pill" id="hdr-time"></div>
+   <div class="utag" id="hdr-role" style="color:var(--red)"></div>
+   <div class="hbtn" onclick="logout()">&#8594;</div>
+  </div>
+ </div>
+ <div class="body">
+  <div class="pnl on" id="p-home">
+   <div class="scrl">
+    <div id="home-user"></div>
+    <div class="slbl">Today Focus</div>
+    <div id="home-focus"></div>
+    <div class="slbl" style="margin-top:14px">Checklists</div>
+    <div class="cl-summary" id="home-cl" onclick="nav('lists')"></div>
+    <div class="slbl" style="margin-top:14px">My Tasks</div>
+    <div class="tlist" id="home-tasks"></div>
+   </div>
+  </div>
+  <div class="pnl" id="p-lists">
+   <div class="phdr">
+    <div class="bk" onclick="nav('home')">&#8592;</div>
+    <div class="ptitle">Checklists</div>
+    <div class="ibtn" onclick="resetAllCL()">&#8635;</div>
+   </div>
+   <div class="scrl">
+    <div class="cl-tab">
+     <div class="cl-tb on" onclick="clTab('pizza',this)">&#127829; Kitchen</div>
+     <div class="cl-tb" onclick="clTab('bar',this)">&#127864; Bar</div>
+     <div class="cl-tb" onclick="clTab('delivery',this)">&#128757; Delivery</div>
+     <div class="cl-tb" onclick="clTab('owner',this)">&#9711; Owner</div>
+    </div>
+    <div class="cl-body on" id="cl-pizza"></div>
+    <div class="cl-body" id="cl-bar"></div>
+    <div class="cl-body" id="cl-delivery"></div>
+    <div class="cl-body" id="cl-owner"></div>
+   </div>
+  </div>
+  <div class="pnl" id="p-contacts">
+   <div class="phdr">
+    <div class="bk" onclick="nav('home')">&#8592;</div>
+    <div class="ptitle">Contacts</div>
+   </div>
+   <div class="scrl">
+    <div class="slbl">Staff</div><div id="con-staff"></div>
+    <div class="slbl" style="margin-top:18px">Suppliers</div><div id="con-sup"></div>
+    <div class="slbl" style="margin-top:18px">Tradies &amp; Services</div><div id="con-trd"></div>
+   </div>
+  </div>
+  <div class="pnl" id="p-ct">
+   <div class="phdr">
+    <div class="bk" onclick="nav('home')">&#8592;</div>
+    <div class="ptitle" style="color:var(--amb)">&#9889; Circle T</div>
+   </div>
+   <div class="scrl" id="ct-body"></div>
+  </div>
+ </div>
+ <div class="bnav">
+  <div class="ni on" id="ni-home" onclick="nav('home')"><div class="ni-ic">&#127968;</div><span class="ni-lb">Home</span></div>
+  <div class="ni" id="ni-lists" onclick="nav('lists')"><div class="ni-ic">&#9989;</div><span class="ni-lb">Lists</span></div>
+  <div style="display:flex;flex-direction:column;align-items:center" onclick="openTask()">
+   <div class="fab">+</div><span class="ni-lb" style="margin-top:5px">Add</span>
+  </div>
+  <div class="ni" id="ni-contacts" onclick="nav('contacts')"><div class="ni-ic">&#128222;</div><span class="ni-lb">Contacts</span></div>
+  <div class="ni" id="ni-ct" onclick="nav('ct')"><div class="ni-ic">&#9889;</div><span class="ni-lb">Circle T</span></div>
+ </div>
+</div>
+<div class="task-modal" id="task-modal">
+ <div class="task-sheet">
+  <div class="ptitle" style="margin-bottom:12px">Add Task</div>
+  <textarea class="task-inp" id="task-inp" rows="3" placeholder="What needs doing?"></textarea>
+  <div class="task-row" id="task-tags"></div>
+  <button class="tsave" onclick="saveTask()">Save Task</button>
+  <div class="tlist" id="modal-tasks"></div>
+  <div style="height:12px"></div>
+  <button class="tsave" style="background:var(--s3);color:var(--mu)" onclick="closeTask()">Close</button>
+ </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+${vars}
+var ROLE_C={kitchen:'#f5a623',bar:'#4ecb6e',delivery:'#5b8def',owner:'#e8341c'};
+var CATS=['kitchen','bar','delivery','ops','admin'];
+function gD(){try{return JSON.parse(localStorage.getItem('slizz_v9')||'{}');}catch(e){return{};}}
+function sD(d){localStorage.setItem('slizz_v9',JSON.stringify(d));}
+function gS(){try{return JSON.parse(localStorage.getItem('slizz_ses')||'null');}catch(e){return null;}}
+function sS(s){localStorage.setItem('slizz_ses',JSON.stringify(s));}
+function gCL(){try{return JSON.parse(localStorage.getItem('slizz_cl')||'{}');}catch(e){return{};}}
+function sCL(d){localStorage.setItem('slizz_cl',JSON.stringify(d));}
+var pb='',curUser=null,curP='home',tasks=[],CL_ST={};
+function tier(){return curUser?curUser.tier||0:0;}
+function dots(){[0,1,2,3].forEach(function(i){var el=document.getElementById('d'+i);if(el)el.classList.toggle('on',i<pb.length);});}
+function pp(d){if(pb.length>=4)return;pb+=d;dots();if(pb.length===4)setTimeout(chk,110);}
+function pd(){if(!pb.length)return;pb=pb.slice(0,-1);dots();document.getElementById('pin-err').classList.remove('show');}
+function chk(){var m=null;for(var i=0;i<USERS.length;i++){if(USERS[i].pin===pb){m=USERS[i];break;}}if(m){curUser=m;sS({id:m.id,ts:Date.now()});unlock();}else{pb='';dots();var err=document.getElementById('pin-err');if(err){err.classList.add('show');setTimeout(function(){err.classList.remove('show');},2000);}}}
+function unlock(){var d=gD();tasks=d.tasks||[];CL_ST=gCL();document.getElementById('pin-screen').style.display='none';document.getElementById('app').style.display='';var role=document.getElementById('hdr-role');if(role){role.textContent=curUser.tag;role.style.color=curUser.col;}updTime();setInterval(updTime,30000);nav('home');}
+function logout(){localStorage.removeItem('slizz_ses');curUser=null;pb='';dots();document.getElementById('app').style.display='none';document.getElementById('pin-screen').style.display='';}
+function updTime(){var n=new Date(),h=n.getHours(),m=n.getMinutes(),ampm=h>=12?'pm':'am';h=h%12||12;var el=document.getElementById('hdr-time');if(el)el.textContent=h+':'+(m<10?'0'+m:m)+ampm;}
+function nav(name){curP=name;var panels=document.querySelectorAll('.pnl');for(var i=0;i<panels.length;i++)panels[i].classList.remove('on');var ni=document.querySelectorAll('.ni');for(var i=0;i<ni.length;i++)ni[i].classList.remove('on');var p=document.getElementById('p-'+name);if(p)p.classList.add('on');var n2=document.getElementById('ni-'+name);if(n2)n2.classList.add('on');var builds={home:buildHome,lists:buildLists,contacts:buildContacts,ct:buildCT};if(builds[name])builds[name]();}
+function buildHome(){if(!curUser)return;var col=curUser.col;var hu=document.getElementById('home-user');if(hu){hu.innerHTML='<div class="home-user"><div class="home-av" style="background:'+col+'20;color:'+col+'">'+curUser.name[0]+'</div><div><div class="home-name">'+curUser.name+'</div><div class="home-role">'+curUser.role+'</div></div><div class="home-time"></div></div>';updTime();}var fb=document.getElementById('home-focus');if(fb){fb.innerHTML='<div class="focus-card"><div class="focus-lbl">&#128279; Live from Notion</div>'+TODAY_FOCUS.map(function(f){return'<div class="focus-item"><div class="focus-dot"></div><div>'+f+'</div></div>';}).join('')+'</div>';}var hcl=document.getElementById('home-cl');if(hcl){var roles=['pizza','bar','delivery'];if(tier()>=4)roles.push('owner');var rows=roles.map(function(role){var items=(CHECKLISTS[role]&&CHECKLISTS[role].daily)||[];if(!items.length)return'';var cs=CL_ST[role+':daily']||[];var done=0;for(var x=0;x<cs.length;x++){if(cs[x])done++;}var pct=items.length?Math.round(done/items.length*100):0;var labels={pizza:'&#127829; Kitchen',bar:'&#127864; Bar',delivery:'&#128757; Delivery',owner:'&#9711; Owner'};return'<div class="cl-sum-row"><div class="cl-sum-lbl">'+labels[role]+'</div><div class="cl-sum-bar"><div class="cl-sum-fill" style="width:'+pct+'%"></div></div><div class="cl-sum-pct">'+pct+'%</div></div>';}).join('');hcl.innerHTML=rows||'<div class="empty">No checklists</div>';}var ht=document.getElementById('home-tasks');if(ht){var myTasks=tasks.filter(function(t){return!t.done;}).slice(0,5);ht.innerHTML=myTasks.length?myTasks.map(function(t,i){return'<div class="titem"><div class="tchk" onclick="doneTask('+i+')"></div><div class="ttxt">'+esc(t.text)+'<div class="tcat">'+(t.cat||'')+'</div></div></div>';}).join(''):'<div class="empty">No open tasks</div>';}}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function openTask(){var modal=document.getElementById('task-modal');if(modal)modal.classList.add('on');var tags=document.getElementById('task-tags');if(tags)tags.innerHTML=CATS.map(function(c){return'<div class="task-tag" onclick="togTag(this)">'+c+'</div>';}).join('');renderModalTasks();}
+function closeTask(){var modal=document.getElementById('task-modal');if(modal)modal.classList.remove('on');}
+function togTag(el){el.classList.toggle('on');}
+function saveTask(){var inp=document.getElementById('task-inp');if(!inp||!inp.value.trim())return;var tag=document.querySelector('.task-tag.on');tasks.unshift({text:inp.value.trim(),cat:tag?tag.textContent:'',done:false,ts:Date.now()});var d=gD();d.tasks=tasks;sD(d);inp.value='';document.querySelectorAll('.task-tag').forEach(function(t){t.classList.remove('on');});renderModalTasks();buildHome();toast('Task added');}
+function doneTask(i){tasks[i].done=true;var d=gD();d.tasks=tasks;sD(d);buildHome();}
+function renderModalTasks(){var mt=document.getElementById('modal-tasks');if(!mt)return;mt.innerHTML=tasks.map(function(t,i){return'<div class="titem"><div class="tchk'+(t.done?' on':'')+'"></div><div class="ttxt'+(t.done?' on':'')+'">'+esc(t.text)+'</div></div>';}).join('')||'<div class="empty">No tasks yet</div>';}
+function buildLists(){buildCLSec('pizza');buildCLSec('bar');buildCLSec('delivery');if(tier()>=4){buildCLSec('owner');}else{var o=document.getElementById('cl-owner');if(o)o.innerHTML='<div class="empty">Owner / Manager only</div>';}}
+function buildCLSec(role){var el=document.getElementById('cl-'+role);if(!el)return;var html='';var periods=['daily','weekly'];for(var p=0;p<periods.length;p++){var period=periods[p];var items=CHECKLISTS[role]&&CHECKLISTS[role][period];if(!items||!items.length)continue;var key=role+':'+period;var cs=CL_ST[key]||[];var done=0;for(var x=0;x<cs.length;x++){if(cs[x])done++;}var pct=Math.round(done/items.length*100);if(period==='weekly')html+='<div class="slbl" style="margin-top:14px">Weekly Tasks</div>';html+='<div class="cl-prog"><div class="cl-prog-bar"><div class="cl-prog-fill" style="width:'+pct+'%"></div></div><span class="cl-prog-txt">'+done+'/'+items.length+' done</span><span class="cl-reset" data-ck="'+key+'" onclick="resetCLK(this.dataset.ck)">Reset</span></div>';html+='<div class="cl-section">';for(var i=0;i<items.length;i++){var on=cs[i]?' on':'';html+='<div class="clitem" data-ck="'+key+'" data-ci="'+i+'" onclick="togCLe(this)"><div class="clchk'+on+'"></div><div class="cltxt'+on+'">'+items[i]+'</div></div>';}html+='</div>';}el.innerHTML=html||'<div class="empty">No items</div>';}
+function togCLe(el){var key=el.dataset.ck,idx=parseInt(el.dataset.ci);if(!CL_ST[key])CL_ST[key]=[];CL_ST[key][idx]=!CL_ST[key][idx];sCL(CL_ST);buildCLSec(key.split(':')[0]);buildHome();}
+function resetCLK(key){CL_ST[key]=[];sCL(CL_ST);buildLists();buildHome();toast('Reset');}
+function resetAllCL(){if(confirm('Reset all checklists?')){CL_ST={};sCL(CL_ST);buildLists();buildHome();toast('All checklists reset');}}
+function clTab(id,el){var tabs=document.querySelectorAll('.cl-tb');for(var i=0;i<tabs.length;i++)tabs[i].classList.remove('on');var bodies=document.querySelectorAll('.cl-body');for(var i=0;i<bodies.length;i++)bodies[i].classList.remove('on');el.classList.add('on');var bd=document.getElementById('cl-'+id);if(bd)bd.classList.add('on');}
+function buildContacts(){var tl=tier();var visible=tl>=4?STAFF:STAFF.filter(function(s){return s.tag!=='owner';});var staffEl=document.getElementById('con-staff');if(staffEl){staffEl.innerHTML=visible.map(function(s){var col=ROLE_C[s.tag]||'#888';var ph=(s.p||'').replace(/\s/g,'');var note=s.note?'<div class="cno">'+s.note+'</div>':'';var call=ph?'<a href="tel:'+ph+'" class="ccall" style="background:'+col+'18">&#128222;</a>':'';return'<div class="ccard"><div class="cav" style="background:'+col+'20;color:'+col+'">'+s.n[0]+'</div><div class="ci"><div class="cn">'+s.n+'</div><div class="cr" style="color:'+col+'">'+s.r+'</div>'+note+'<div class="cno">'+(s.p||'No number')+'</div></div>'+call+'</div>';}).join('');}
+var supEl=document.getElementById('con-sup');if(supEl){if(tl>=3){supEl.innerHTML=SUPPLIERS.map(function(s){var m=(s.ct||'').match(/0[0-9 ]+/),ph=m?m[0].replace(/\s/g,''):'';var call=ph?'<a href="tel:'+ph+'" class="ccall" style="background:rgba(232,52,28,.1)">&#128222;</a>':'';return'<div class="supcard"><div class="sup-nm">'+s.nm+'</div><div class="sup-pr">'+s.pr+'</div><div class="sup-row"><div class="sup-ct">'+s.ct+(s.ct2?'<br>'+s.ct2:'')+'</div>'+call+'</div>'+(s.nt?'<div class="sup-nt">'+s.nt+'</div>':'')+'</div>';}).join('');}else{supEl.innerHTML='<div class="empty">Kitchen role required</div>';}}
+var trdEl=document.getElementById('con-trd');if(trdEl){if(tl>=3){trdEl.innerHTML=TRADIES.map(function(tr){var m=(tr.ct||'').match(/0[0-9 ]+/),ph=m?m[0].replace(/\s/g,''):'';var call=ph?'<a href="tel:'+ph+'" class="ccall" style="background:rgba(78,203,110,.1)">&#128222;</a>':'';return'<div class="ccard" style="align-items:flex-start"><div style="flex:1"><div class="cn">'+tr.tr+'</div><div class="cno" style="margin-top:3px">'+tr.ct+(tr.ct2?'<br>'+tr.ct2:'')+(tr.ct3?'<br>'+tr.ct3:'')+'</div>'+(tr.nt?'<div class="cno">'+tr.nt+'</div>':'')+'</div>'+call+'</div>';}).join('');}else{trdEl.innerHTML='<div class="empty">Kitchen role required</div>';}}
+function buildCT(){var tl=tier(),html='';CT_GROUPS.forEach(function(g){var links=g.links.filter(function(l){return l.t<=tl;});if(!links.length)return;html+='<div class="ct-grp">'+g.grp+'</div>';links.forEach(function(l){html+='<a href="'+CT_BASE+l.p+'" target="_blank" class="ctlink"><div class="ct-ico">'+l.i+'</div><div class="ct-lbl">'+l.l+'</div><div class="ct-arr">&#8250;</div></a>';});});var ctBody=document.getElementById('ct-body');if(ctBody)ctBody.innerHTML=html||'<div class="empty">No links for your role</div>';}
+function toast(msg){var t=document.getElementById('toast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
+(function boot(){var ses=gS();if(ses&&ses.id){var u=USERS.filter(function(x){return x.id===ses.id;})[0];if(u&&Date.now()-ses.ts<86400000*7){curUser=u;unlock();return;}}document.getElementById('pin-screen').style.display='';})();
+</script>
+</body>
+</html>`;
+}
+
+// --- Main -------------------------------------------------------
+async function main() {
+  console.log('Starting Notion sync...');
+  const [todayFocus, checklists] = await Promise.all([
+    fetchTodayFocus(),
+    fetchChecklists(),
+  ]);
+  console.log('Today focus:', todayFocus);
+  console.log('Checklists loaded for:', Object.keys(checklists).join(', '));
+  const html = buildHTML(todayFocus, checklists);
+  writeFileSync('index.html', html, 'utf8');
+  console.log('index.html written (' + html.length + ' chars)');
+}
+
+main().catch(function(err) { console.error(err); process.exit(1); });
