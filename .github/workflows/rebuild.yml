@@ -1,5 +1,5 @@
 name: Sync Notion and Rebuild Slizz App
-​
+
 on:
   schedule:
     - cron: '0 20 * * *'
@@ -9,7 +9,7 @@ on:
       - main
     paths:
       - build.mjs
-​
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,17 +18,17 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-​
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-​
+
       - name: Run Notion sync build
         run: node build.mjs
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
-​
+
       - name: Commit updated index.html
         run: |
           git config user.name "Slizz Bot"
@@ -36,4 +36,3 @@ jobs:
           git add index.html
           git diff --staged --quiet || git commit -m "auto Notion sync"
           git push
-​
