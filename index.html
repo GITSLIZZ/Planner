@@ -981,11 +981,16 @@ function switchTab(name,el){
 function toggleApiBanner(){document.getElementById('api-banner').classList.toggle('show')}
 function saveApiKey(){const v=document.getElementById('api-key-input').value.trim();if(!v.startsWith('sk-ant')){showToast('Key should start with sk-ant');return}localStorage.setItem(AK,v);document.getElementById('api-key-input').value='';document.getElementById('api-banner').classList.remove('show');const btn=document.getElementById('api-btn');btn.textContent='API ✓';btn.classList.add('green');showToast('API key saved ✓')}
 
-function askClaude(){
+const NOTION_BACKEND='https://planner-production-a12f.up.railway.app'
+
+async function askClaude(){
   const d=load(),tasks=d.tasks||[],done=tasks.filter(t=>t.done).length
   const ts=Object.entries(TENTS).map(([id,t])=>{const items=tasks.filter(task=>task.tent===id);const td=items.filter(i=>i.done).length;const u=items.filter(i=>!i.done&&i.urgency==='urgent').length;return`${t.name}: ${items.length} tasks, ${td} done${u?', '+u+' urgent':''}`}).join(' | ')
   const urgent=tasks.filter(t=>!t.done&&t.urgency==='urgent').map(t=>t.text).join(', ')
-  const msg=`I'm Scott, owner of Thin Slizzy — rock n roll pizzeria at 115 Johnston St Collingwood, next to The Tote. Solo operator, ~$18k/week revenue, casual staff weekends.\n\nTonight's focus: ${d.focus||'not set'}\nTasks: ${done}/${tasks.length} done\n${urgent?'URGENT: '+urgent:''}\nTentacles: ${ts}\nUpcoming events: ${(d.events||[]).slice(0,3).map(e=>e.name).join(', ')||'none'}\n\nWhat should I focus on right now? What am I missing?`
+  let notionCtx=''
+  try{const r=await fetch(NOTION_BACKEND+'/snapshot',{signal:AbortSignal.timeout(4000)});if(r.ok){const s=await r.json();notionCtx=s.claudeContext||''}}catch(e){}
+  const local=`Tonight's focus: ${d.focus||'not set'}\nTasks: ${done}/${tasks.length} done\n${urgent?'URGENT: '+urgent:''}\nTentacles: ${ts}\nUpcoming events: ${(d.events||[]).slice(0,3).map(e=>e.name).join(', ')||'none'}`
+  const msg=notionCtx?notionCtx+'\n\n--- LOCAL ---\n'+local:`I'm Scott, owner of Thin Slizzy — rock n roll pizzeria at 115 Johnston St Collingwood.\n\n${local}\n\nWhat should I focus on right now?`
   window.open('https://claude.ai/new?q='+encodeURIComponent(msg),'_blank')
 }
 
