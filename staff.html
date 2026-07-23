@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Thin Slizzy">
+<meta name="theme-color" content="#111111">
+<title>Thin Slizzy Staff</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #111111;
+    --surface: #1a1a1a;
+    --card: #222222;
+    --border: rgba(255,255,255,0.08);
+    --text: #ffffff;
+    --text2: rgba(255,255,255,0.55);
+    --red: #E63946;
+    --orange: #DE9255;
+    --green: #72BC8F;
+    --blue: #5E9FE8;
+    --purple: #BF8EDA;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+  /* SPLASH / ROLE SELECT */
+  #splash {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 32px 24px;
+    text-align: center;
+  }
+  .splash-logo { font-size: 48px; margin-bottom: 16px; }
+  .splash-title { font-size: 28px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .splash-title span { color: var(--red); }
+  .splash-sub { font-size: 14px; color: var(--text2); margin-bottom: 40px; }
+  .role-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 340px; }
+  .role-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+  }
+  .role-btn:active { transform: scale(0.96); }
+  .role-btn .role-icon { font-size: 28px; margin-bottom: 8px; }
+  .role-btn .role-name { font-size: 14px; font-weight: 600; }
+  .role-btn.chef { border-color: rgba(222,146,85,0.3); }
+  .role-btn.bar { border-color: rgba(94,159,232,0.3); }
+  .role-btn.delivery { border-color: rgba(114,188,143,0.3); }
+  .role-btn.owner { border-color: rgba(230,57,70,0.3); }
+
+  /* MAIN APP */
+  #app { display: none; flex-direction: column; min-height: 100vh; padding-bottom: 80px; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  .top-bar-left { display: flex; align-items: center; gap: 10px; }
+  .role-pill {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .role-pill.chef { background: rgba(222,146,85,0.15); color: var(--orange); }
+  .role-pill.bar { background: rgba(94,159,232,0.15); color: var(--blue); }
+  .role-pill.delivery { background: rgba(114,188,143,0.15); color: var(--green); }
+  .role-pill.owner { background: rgba(230,57,70,0.15); color: var(--red); }
+  .top-bar-name { font-size: 16px; font-weight: 700; }
+  .clock-display { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .content { padding: 16px 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  /* CLOCK IN/OUT */
+  .clock-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid var(--border);
+  }
+  .clock-status { font-size: 12px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
+  .clock-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+    letter-spacing: 0.02em;
+  }
+  .clock-btn:active { transform: scale(0.97); }
+  .clock-btn.in { background: var(--green); color: #111; }
+  .clock-btn.out { background: var(--red); color: white; }
+  .clock-time { font-size: 13px; color: var(--text2); margin-top: 10px; }
+
+  /* SECTION */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    margin-bottom: 10px;
+  }
+
+  /* QUICK LINKS */
+  .links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .link-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .link-card:active { transform: scale(0.96); background: #2a2a2a; }
+  .link-card .link-icon { font-size: 22px; }
+  .link-card .link-label { font-size: 13px; font-weight: 600; }
+  .link-card .link-sub { font-size: 11px; color: var(--text2); }
+
+  /* CHECKLIST */
+  .checklist-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .check-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.1s;
+  }
+  .check-item:last-child { border-bottom: none; }
+  .check-item:active { background: #2a2a2a; }
+  .check-box {
+    width: 22px; height: 22px;
+    border-radius: 6px;
+    border: 2px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.18s;
+  }
+  .check-item.done .check-box { background: var(--green); border-color: var(--green); }
+  .check-item.done .check-box::after { content: ''; display: block; width: 6px; height: 10px; border: 2px solid #111; border-top: none; border-left: none; transform: rotate(45deg) translateY(-1px); }
+  .check-text { font-size: 15px; }
+  .check-item.done .check-text { text-decoration: line-through; color: var(--text2); }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 4px 0;
+    cursor: pointer;
+    color: var(--text2);
+    background: none;
+    border: none;
+    font-family: inherit;
+    transition: color 0.15s;
+  }
+  .nav-btn.active { color: var(--text); }
+  .nav-btn .nav-icon { font-size: 20px; }
+  .nav-btn .nav-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- STEP 1: PICK YOUR ROLE -->
+<div id="splash">
+  <div class="splash-logo">🍕</div>
+  <div class="splash-title">Thin <span>Slizzy</span></div>
+  <div class="splash-sub">Who are you?</div>
+  <div class="role-grid">
+    <div class="role-btn chef" onclick="setRole('chef', '💪', 'Kitchen')">
+      <div class="role-icon">👨‍🍳</div>
+      <div class="role-name">Kitchen</div>
+    </div>
+    <div class="role-btn bar" onclick="setRole('bar', '🍺', 'Bar')">
+      <div class="role-icon">🍺</div>
+      <div class="role-name">Bar</div>
+    </div>
+    <div class="role-btn delivery" onclick="setRole('delivery', '🚴', 'Delivery')">
+      <div class="role-icon">🚴</div>
+      <div class="role-name">Delivery</div>
+    </div>
+    <div class="role-btn owner" onclick="setRole('owner', '🔥', 'Owner')">
+      <div class="role-icon">🔥</div>
+      <div class="role-name">Owner</div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2: MAIN APP -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span id="rolePill" class="role-pill"></span>
+      <span class="top-bar-name">Thin Slizzy</span>
+    </div>
+    <div class="clock-display" id="topClock">--:--</div>
+  </div>
+
+  <div class="content" id="mainContent"></div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="showTab('home')" id="tab-home">
+      <span class="nav-icon">🏠</span>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('roster')" id="tab-roster">
+      <span class="nav-icon">📍</span>
+      <span class="nav-label">Roster</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('tasks')" id="tab-tasks">
+      <span class="nav-icon">✅</span>
+      <span class="nav-label">Tasks</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('contacts')" id="tab-contacts">
+      <span class="nav-icon">📞</span>
+      <span class="nav-label">Contacts</span>
+    </button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let currentRole = null;
+  let clockedIn = false;
+  let clockInTime = null;
+  let currentTab = 'home';
+
+  // ── ROLE DATA ──
+  const ROLES = {
+    chef: {
+      name: 'Kitchen', icon: '👨‍🍳',
+      links: [
+        { icon: '📦', label: 'Suppliers', sub: 'Order & contacts', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/produce-ordering' },
+        { icon: '🔧', label: 'Tradies', sub: 'Maintenance', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/knowledge' },
+        { icon: '✅', label: 'Checklists', sub: 'Opening & closing', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/knowledge' },
+        { icon: '🍕', label: 'Menu', sub: 'Recipes & specs', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/knowledge' },
+      ],
+      checklist: [
+        'Check stock levels',
+        'Prep dough',
+        'Check produce order',
+        'Clean benches',
+        'End of night: cover & store',
+      ]
+    },
+    bar: {
+      name: 'Bar', icon: '🍺',
+      links: [
+        { icon: '📅', label: 'Roster', sub: 'Who\'s on', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/rosters' },
+        { icon: '🍺', label: 'Liquor Order', sub: 'Paramount', url: 'https://paramountliquor.com.au' },
+        { icon: '✅', label: 'Checklists', sub: 'Bar open/close', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/knowledge' },
+        { icon: '📞', label: 'Team', sub: 'Staff contacts', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/team-admin' },
+      ],
+      checklist: [
+        'Stock fridge',
+        'Check kegs',
+        'Float counted',
+        'Glasses clean',
+        'End of night: cash up',
+      ]
+    },
+    delivery: {
+      name: 'Delivery', icon: '🚴',
+      links: [
+        { icon: '📍', label: 'Roster', sub: 'My shifts', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/rosters' },
+        { icon: '🗣️', label: 'Team Chat', sub: 'WhatsApp', url: 'https://wa.me' },
+        { icon: '✅', label: 'Checklist', sub: 'Before you go', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/knowledge' },
+        { icon: '📞', label: 'Contacts', sub: 'Staff numbers', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/team-admin' },
+      ],
+      checklist: [
+        'Check e-bike battery',
+        'Delivery bag ready',
+        'Phone charged',
+        'Log deliveries',
+      ]
+    },
+    owner: {
+      name: 'Owner', icon: '🔥',
+      links: [
+        { icon: '⚡', label: 'Today', sub: 'Daily dashboard', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/today' },
+        { icon: '🧠', label: 'Ops Manager', sub: 'AI briefing', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/ops-manager' },
+        { icon: '💰', label: 'Catering', sub: 'Jobs & deposits', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/catering' },
+        { icon: '🔊', label: 'Voice Notes', sub: 'Owner only', url: 'https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/voice-notes' },
+      ],
+      checklist: [
+        'Check Ops Manager',
+        'Roster confirmed',
+        'Produce orders OK',
+        'Catering enquiries actioned',
+        'Voice Notes cleared',
+      ]
+    }
+  };
+
+  // ── INIT ──
+  function setRole(role, icon, name) {
+    currentRole = role;
+    localStorage.setItem('slizz_role', role);
+    document.getElementById('splash').style.display = 'none';
+    document.getElementById('app').style.display = 'flex';
+    const pill = document.getElementById('rolePill');
+    pill.textContent = name;
+    pill.className = `role-pill ${role}`;
+    showTab('home');
+    startClock();
+  }
+
+  // Check if role was saved
+  window.addEventListener('load', () => {
+    const saved = localStorage.getItem('slizz_role');
+    const roleData = { chef: ['Chef','Kitchen'], bar: ['Bar','Bar'], delivery: ['Delivery','Delivery'], owner: ['Owner','Owner'] };
+    if (saved && roleData[saved]) setRole(saved, '', roleData[saved][1]);
+    else startClock();
+  });
+
+  // ── CLOCK ──
+  function startClock() {
+    function tick() {
+      const now = new Date();
+      const t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+      document.getElementById('topClock').textContent = t;
+    }
+    tick();
+    setInterval(tick, 30000);
+  }
+
+  // ── TABS ──
+  function showTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    renderContent();
+  }
+
+  function renderContent() {
+    const content = document.getElementById('mainContent');
+    const role = ROLES[currentRole];
+    if (!role) return;
+
+    if (currentTab === 'home') {
+      content.innerHTML = `
+        <div>
+          <div class="section-title">⏰ Clock In / Out</div>
+          <div class="clock-card">
+            <div class="clock-status" id="clockStatus">${clockedIn ? '✅ Clocked in at ' + clockInTime : 'Not clocked in'}</div>
+            <button class="clock-btn ${clockedIn ? 'out' : 'in'}" onclick="toggleClock()">
+              ${clockedIn ? '🛑 Clock Out' : '⏰ Clock In'}
+            </button>
+            ${clockedIn ? '' : '<div class="clock-time">Tap to start your shift</div>'}
+          </div>
+        </div>
+        <div>
+          <div class="section-title">⚡ Quick Links</div>
+          <div class="links-grid">
+            ${role.links.map(l => `
+              <a class="link-card" href="${l.url}" target="_blank">
+                <div class="link-icon">${l.icon}</div>
+                <div class="link-label">${l.label}</div>
+                <div class="link-sub">${l.sub}</div>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (currentTab === 'tasks') {
+      const today = new Date().toDateString();
+      const key = 'slizz_tasks_' + currentRole + '_' + today;
+      let state = {};
+      try { state = JSON.parse(localStorage.getItem(key) || '{}'); } catch{}
+      content.innerHTML = `
+        <div>
+          <div class="section-title">✅ Today's Checklist</div>
+          <div class="checklist-card">
+            ${role.checklist.map((item, i) => `
+              <div class="check-item ${state[i] ? 'done' : ''}" onclick="toggleTask(${i})" id="task-${i}">
+                <div class="check-box"></div>
+                <span class="check-text">${item}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    if (currentTab === 'roster') {
+      content.innerHTML = `
+        <div>
+          <div class="section-title">📍 Roster</div>
+          <a class="link-card" href="https://37cbc0f8-4e94-4869-84ca-242686eac900.dev.cdf.circlet.com.au/rosters" target="_blank" style="display:flex;flex-direction:row;gap:14px;align-items:center;">
+            <div class="link-icon" style="font-size:32px">📅</div>
+            <div>
+              <div class="link-label" style="font-size:16px">View Weekly Roster</div>
+              <div class="link-sub">Opens in Circle T</div>
+            </div>
+          </a>
+          <div style="margin-top:16px;padding:16px;background:var(--card);border-radius:14px;border:1px solid var(--border);">
+            <div class="section-title" style="margin-bottom:8px">📞 Need to swap a shift?</div>
+            <p style="font-size:14px;color:var(--text2);line-height:1.5">Contact Scott: <strong style="color:var(--text)">0406 782 963</strong></p>
+          </div>
+        </div>
+      `;
+    }
+
+    if (currentTab === 'contacts') {
+      const contacts = [
+        { name: 'Scott (Owner)', phone: '0406 782 963', role: 'owner' },
+        { name: 'Krishna (Head Chef)', phone: '0449 500 515', role: 'chef' },
+        { name: 'Doss (Bar/Delivery)', phone: '0438 730 183', role: 'bar' },
+        { name: 'Lydia (Bar)', phone: '0449 593 865', role: 'bar' },
+        { name: 'Issaq (Delivery)', phone: '0470 489 279', role: 'delivery' },
+        { name: 'Dash (Delivery)', phone: '0452 411 697', role: 'delivery' },
+      ];
+      content.innerHTML = `
+        <div>
+          <div class="section-title">📞 Staff Contacts</div>
+          <div class="checklist-card">
+            ${contacts.map(c => `
+              <a class="check-item" href="tel:${c.phone.replace(/\s/g,'')}" style="text-decoration:none;color:inherit;">
+                <span style="font-size:20px">${c.role==='chef'?'👨‍🍳':c.role==='bar'?'🍺':c.role==='delivery'?'🚴':'🔥'}</span>
+                <div style="flex:1">
+                  <div class="check-text" style="font-weight:600">${c.name}</div>
+                  <div style="font-size:12px;color:var(--text2);margin-top:2px">${c.phone}</div>
+                </div>
+                <span style="color:var(--green);font-size:18px">📞</span>
+              </a>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // ── CLOCK IN/OUT ──
+  function toggleClock() {
+    const now = new Date();
+    const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    if (!clockedIn) {
+      clockedIn = true;
+      clockInTime = timeStr;
+      showToast('⏰ Clocked in at ' + timeStr);
+    } else {
+      clockedIn = false;
+      showToast('🛑 Clocked out at ' + timeStr);
+    }
+    renderContent();
+  }
+
+  // ── TASK TOGGLE ──
+  function toggleTask(i) {
+    const today = new Date().toDateString();
+    const key = 'slizz_tasks_' + currentRole + '_' + today;
+    let state = {};
+    try { state = JSON.parse(localStorage.getItem(key) || '{}'); } catch{}
+    state[i] = !state[i];
+    localStorage.setItem(key, JSON.stringify(state));
+    const item = document.getElementById('task-' + i);
+    item.classList.toggle('done', state[i]);
+  }
+
+  // ── CHANGE ROLE ──
+  function changeRole() {
+    localStorage.removeItem('slizz_role');
+    location.reload();
+  }
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
