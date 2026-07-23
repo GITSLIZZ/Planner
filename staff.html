@@ -293,6 +293,25 @@
 
 <div class="toast" id="toast"></div>
 
+<div id="workingBanner" style="
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #72BC8F;
+  color: #111;
+  text-align: center;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+">
+  ✅ YES — it's working!
+  <span onclick="document.getElementById('workingBanner').style.display='none'" style="cursor:pointer;font-size:18px;margin-left:8px">×</span>
+</div>
+
 <script>
   let currentRole = null;
   let clockedIn = false;
