@@ -1,38 +1,33 @@
-name: Sync Notion and Rebuild Slizz App
+name: Rebuild SLIZZ from Notion
 
 on:
   schedule:
-    - cron: '0 20 * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *'   # Every 30 minutes, all day, every day
+  workflow_dispatch:          # Also run manually anytime
   push:
-    branches:
-      - main
     paths:
-      - build.mjs
+      - 'build.mjs'           # Rebuild if the build script changes
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Run Notion sync build
-        run: node build.mjs
+      - name: Rebuild index.html from Notion
         env:
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: node build.mjs
 
-      - name: Commit updated index.html
+      - name: Commit and push if changed
         run: |
-          git config user.name "Slizz Bot"
-          git config user.email "bot@slizz.app"
+          git config user.name  "Zoli Bot"
+          git config user.email "zoli@thinslizzy.com"
           git add index.html
-          git diff --staged --quiet || git commit -m "auto Notion sync"
+          git diff --cached --quiet || git commit -m "Auto-rebuild from Notion $(date '+%d %b %Y %H:%M AEST')"
           git push
