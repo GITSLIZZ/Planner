@@ -1,22 +1,22 @@
 import { writeFileSync, readFileSync } from 'fs';
-​
+
 const TOKEN = process.env.NOTION_TOKEN;
 if (!TOKEN) { console.error('NOTION_TOKEN not set'); process.exit(1); }
-​
+
 const H = { 'Authorization': 'Bearer ' + TOKEN, 'Notion-Version': '2022-06-28' };
-​
+
 async function blocks(id) {
   const url = 'https://api.notion.com/v1/blocks/' + id.replace(/-/g,'') + '/children?page_size=100';
   const r = await fetch(url, { headers: H });
   if (!r.ok) return [];
   return (await r.json()).results || [];
 }
-​
+
 function txt(b) {
   const c = b[b.type];
   return c && c.rich_text ? c.rich_text.map(function(t){return t.plain_text;}).join('') : '';
 }
-​
+
 async function getTodayFocus() {
   const bs = await blocks('35db390ee987807882aed864494124a3');
   const items = [];
@@ -31,7 +31,7 @@ async function getTodayFocus() {
   }
   return items.length ? items : ['Check Command Centre for priorities'];
 }
-​
+
 async function getChecklists() {
   const bs = await blocks('2a3b390ee98780a5b1c9f6981aad41e5');
   const res = { pizza:{daily:[],weekly:[]}, bar:{daily:[]}, delivery:{daily:[],weekly:[]}, owner:{daily:[]} };
@@ -73,7 +73,7 @@ async function getChecklists() {
   }
   return res;
 }
-​
+
 async function main() {
   console.log('Fetching Notion data...');
   const [focus, cls] = await Promise.all([getTodayFocus(), getChecklists()]);
@@ -99,7 +99,5 @@ async function main() {
   writeFileSync('index.html', html, 'utf8');
   console.log('Done - index.html updated');
 }
-​
+
 main().catch(function(e){ console.error(e); process.exit(1); });
-​
-Notion AI
